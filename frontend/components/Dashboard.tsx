@@ -38,6 +38,7 @@ interface TransactionData {
 const Dashboard: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [demoMode, setDemoMode] = useState(false)
 
   // Check if backend is available
@@ -129,6 +130,8 @@ This assessment aligns with Basel III operational risk management requirements a
     if (!analysisResult) return
 
     try {
+      setIsExporting(true)
+      
       const response = await fetch('http://localhost:8000/export-pdf', {
         method: 'POST',
         headers: {
@@ -138,23 +141,31 @@ This assessment aligns with Basel III operational risk management requirements a
       })
 
       if (!response.ok) {
-        throw new Error('PDF export failed')
+        const errorData = await response.json()
+        throw new Error(errorData.detail || 'PDF export failed')
       }
 
+      // Get the blob from response
       const blob = await response.blob()
+      
+      // Create download link
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `fraud_audit_report_${analysisResult.case_id}.pdf`
+      a.download = `FraudGuard-${analysisResult.case_id}-${new Date().toISOString().split('T')[0]}.pdf`
       document.body.appendChild(a)
       a.click()
+      
+      // Cleanup
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
       
-      toast.success('PDF report downloaded')
+      toast.success('Report downloaded successfully')
     } catch (error) {
       console.error('PDF export error:', error)
-      toast.error('PDF export failed')
+      toast.error(`PDF export failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -304,12 +315,22 @@ This assessment aligns with Basel III operational risk management requirements a
                 {analysisResult && (
                   <motion.button
                     onClick={exportPDF}
-                    className="flex items-center space-x-2 px-4 py-2 bg-primary hover:bg-primary/80 rounded-lg transition-colors ripple"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    disabled={isExporting}
+                    className="flex items-center space-x-2 px-4 py-2 bg-primary hover:bg-primary/80 rounded-lg transition-colors ripple disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: isExporting ? 1 : 1.05 }}
+                    whileTap={{ scale: isExporting ? 1 : 0.95 }}
                   >
-                    <Download className="w-4 h-4" />
-                    <span>Export PDF</span>
+                    {isExporting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Exporting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        <span>Export PDF</span>
+                      </>
+                    )}
                   </motion.button>
                 )}
               </div>

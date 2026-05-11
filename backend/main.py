@@ -5,7 +5,7 @@ Production-grade fraud detection API with LLM-powered audit narratives.
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Dict, List, Any, Optional
 import uuid
@@ -147,18 +147,11 @@ async def export_pdf_report(request: PDFExportRequest):
         request: Analysis result to export
         
     Returns:
-        Downloadable PDF file
+        StreamingResponse with PDF file
     """
     try:
-        # Generate PDF report
-        pdf_path = generate_pdf_report(request.analysis_result.dict())
-        
-        # Return file response
-        return FileResponse(
-            path=pdf_path,
-            filename=f"fraud_audit_report_{request.analysis_result.case_id}.pdf",
-            media_type="application/pdf"
-        )
+        # Generate PDF report as StreamingResponse
+        return generate_pdf_report(request.analysis_result.dict())
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PDF export failed: {str(e)}")
