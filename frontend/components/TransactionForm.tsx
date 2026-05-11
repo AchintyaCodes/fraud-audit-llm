@@ -86,7 +86,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
             onChange={(e) => handleInputChange('transaction_amount', parseFloat(e.target.value) || 0)}
             onFocus={() => setFocusedField('amount')}
             onBlur={() => setFocusedField(null)}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white placeholder-transparent"
+            disabled={isLoading}
+            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white placeholder-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="Transaction Amount"
           />
           <label className="absolute left-12 top-3 text-gray-400 transition-all duration-200 pointer-events-none">
@@ -108,7 +109,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
             onChange={(e) => handleInputChange('merchant_category', parseInt(e.target.value))}
             onFocus={() => setFocusedField('merchant')}
             onBlur={() => setFocusedField(null)}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white appearance-none"
+            disabled={isLoading}
+            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {merchantCategories.map(category => (
               <option key={category.value} value={category.value} className="bg-card text-white">
@@ -139,7 +141,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
             onChange={(e) => handleInputChange('time_of_day', parseFloat(e.target.value) || 0)}
             onFocus={() => setFocusedField('time')}
             onBlur={() => setFocusedField(null)}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white placeholder-transparent"
+            disabled={isLoading}
+            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white placeholder-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="Time of Day"
           />
           <label className="absolute left-12 top-3 text-gray-400 transition-all duration-200 pointer-events-none">
@@ -166,10 +169,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
         <motion.button
           type="button"
           onClick={() => handleInputChange('location_mismatch', !formData.location_mismatch)}
-          className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+          disabled={isLoading}
+          className={`relative w-12 h-6 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
             formData.location_mismatch ? 'bg-primary' : 'bg-gray-600'
           }`}
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: isLoading ? 1 : 0.95 }}
         >
           <motion.div
             className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-md"
@@ -194,10 +198,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
         <motion.button
           type="button"
           onClick={() => handleInputChange('previous_fraud_history', !formData.previous_fraud_history)}
-          className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+          disabled={isLoading}
+          className={`relative w-12 h-6 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
             formData.previous_fraud_history ? 'bg-primary' : 'bg-gray-600'
           }`}
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: isLoading ? 1 : 0.95 }}
         >
           <motion.div
             className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-md"
@@ -232,7 +237,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
             onChange={(e) => handleInputChange('device_risk_score', parseInt(e.target.value))}
             onFocus={() => setFocusedField('device')}
             onBlur={() => setFocusedField(null)}
-            className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
+            disabled={isLoading}
+            className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: `linear-gradient(to right, #22c55e 0%, #f59e0b 50%, #ef4444 100%)`
             }}
@@ -254,8 +260,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
       >
         {isLoading ? (
           <div className="flex items-center justify-center space-x-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Analyzing Transaction...</span>
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span>Analyzing...</span>
           </div>
         ) : (
           'Analyze Transaction'

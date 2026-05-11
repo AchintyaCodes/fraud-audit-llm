@@ -116,13 +116,35 @@ const ShapChart: React.FC<ShapChartProps> = ({ features, isLoading }) => {
             </div>
 
             {/* Custom Horizontal Bar Chart */}
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1
+                  }
+                }
+              }}
+            >
               {chartData.map((item, index) => (
                 <motion.div
                   key={item.name}
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  variants={{
+                    hidden: { opacity: 0, x: -20 },
+                    visible: { 
+                      opacity: 1, 
+                      x: 0,
+                      transition: {
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 15
+                      }
+                    }
+                  }}
                   className="flex items-center space-x-3"
                 >
                   {/* Feature Name */}
@@ -141,7 +163,14 @@ const ShapChart: React.FC<ShapChartProps> = ({ features, isLoading }) => {
                         }}
                         initial={{ width: 0 }}
                         animate={{ width: `${(item.value / Math.max(...chartData.map(d => d.value))) * 100}%` }}
-                        transition={{ delay: index * 0.1 + 0.2, duration: 0.8, ease: "easeOut" }}
+                        transition={{ 
+                          delay: index * 0.1 + 0.2, 
+                          duration: 0.8, 
+                          ease: "easeOut",
+                          type: "spring",
+                          stiffness: 100,
+                          damping: 15
+                        }}
                       />
                     </div>
                     
@@ -163,7 +192,12 @@ const ShapChart: React.FC<ShapChartProps> = ({ features, isLoading }) => {
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ delay: index * 0.1 + 0.3, type: "spring" }}
+                      transition={{ 
+                        delay: index * 0.1 + 0.3, 
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 15
+                      }}
                       className={`w-2 h-2 rounded-full ${
                         item.contribution === 'fraud' ? 'bg-red-500' : 'bg-blue-500'
                       }`}
@@ -171,7 +205,7 @@ const ShapChart: React.FC<ShapChartProps> = ({ features, isLoading }) => {
                   </div>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Impact Summary */}
             <motion.div

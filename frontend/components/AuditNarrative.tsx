@@ -29,7 +29,7 @@ const AuditNarrative: React.FC<AuditNarrativeProps> = ({
       setDisplayedText('')
       setShowAction(false)
       
-      // Typewriter effect
+      // Typewriter effect with 20ms per character
       let currentIndex = 0
       const typeInterval = setInterval(() => {
         if (currentIndex < narrative.length) {
@@ -40,7 +40,7 @@ const AuditNarrative: React.FC<AuditNarrativeProps> = ({
           setIsTyping(false)
           setTimeout(() => setShowAction(true), 500)
         }
-      }, 20) // Adjust speed here
+      }, 20) // 20ms per character as requested
 
       return () => clearInterval(typeInterval)
     } else if (isLoading) {

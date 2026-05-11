@@ -51,7 +51,7 @@ const RiskScoreRing: React.FC<RiskScoreRingProps> = ({ score, riskLevel, isLoadi
 
   return (
     <div className="flex flex-col items-center justify-center py-8">
-      <div className="relative">
+      <div className={`relative ${riskLevel === 'HIGH' ? 'risk-ring-pulse' : ''}`}>
         {/* Background Ring */}
         <svg width="200" height="200" className="transform -rotate-90">
           <circle
@@ -85,7 +85,6 @@ const RiskScoreRing: React.FC<RiskScoreRingProps> = ({ score, riskLevel, isLoadi
                   ease: "easeOut",
                   delay: 0.5 
                 }}
-                className={riskLevel === 'HIGH' ? 'pulse-high-risk' : ''}
                 style={{
                   filter: `drop-shadow(${getRingGlow()})`
                 }}
