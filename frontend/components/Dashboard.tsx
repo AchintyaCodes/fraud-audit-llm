@@ -157,26 +157,31 @@ This assessment aligns with Basel III operational risk management requirements a
     try {
       setIsExporting(true)
       
-      const response = await axios.post(
-        'http://localhost:8000/export-pdf',
-        analysisResult,  // Send analysisResult directly, not nested
-        { responseType: 'blob' }
-      )
+      const response = await axios({
+        method: 'POST',
+        url: 'http://localhost:8000/export-pdf',
+        data: analysisResult,
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
 
-      // Create download link
-      const url = URL.createObjectURL(
-        new Blob([response.data], { type: 'application/pdf' })
-      )
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `FraudGuard-${analysisResult.case_id}.pdf`
+      link.setAttribute('download', `FraudGuard-${Date.now()}.pdf`)
+      document.body.appendChild(link)
       link.click()
-      URL.revokeObjectURL(url)
+      link.remove()
+      window.URL.revokeObjectURL(url)
       
       toast.success('Report downloaded successfully')
-    } catch (error) {
-      console.error('PDF export error:', error)
-      toast.error(`PDF export failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } catch (error: any) {
+      console.error('PDF error:', error.response)
+      const errorMsg = error.response?.data?.detail || error.message || 'Unknown error'
+      toast.error(`PDF export failed: ${errorMsg}`)
     } finally {
       setIsExporting(false)
     }
@@ -201,15 +206,14 @@ This assessment aligns with Basel III operational risk management requirements a
   }
 
   return (
-    <div className="min-h-screen bg-background dot-grid relative">
-      <FloatingParticles />
+    <div className="min-h-screen bg-bg-primary dot-grid relative">
       <Toaster 
         position="top-right"
         toastOptions={{
           style: {
-            background: '#111118',
+            background: '#111111',
             color: '#fff',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            border: '1px solid #222222',
           },
         }}
       />
@@ -219,16 +223,15 @@ This assessment aligns with Basel III operational risk management requirements a
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="glass border-b border-white/10 relative"
+        className="bg-bg-primary border-b border-border relative"
       >
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 gradient-border"></div>
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <motion.div 
             className="flex items-center space-x-3"
             whileHover={{ scale: 1.05 }}
           >
-            <Shield className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold logo-shimmer">FraudGuard AI</h1>
+            <Shield className="w-8 h-8 text-accent-blue" />
+            <h1 className="text-2xl font-bold text-text-primary">FraudGuard AI</h1>
           </motion.div>
           
           <div className="flex items-center space-x-4">
@@ -236,17 +239,17 @@ This assessment aligns with Basel III operational risk management requirements a
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm border border-amber-500/30"
+                className="px-3 py-1 bg-bg-tertiary text-text-secondary rounded-full text-sm border border-border-hover"
               >
                 Demo Mode
               </motion.div>
             )}
             <motion.div
-              className="flex items-center space-x-2 px-4 py-2 glass rounded-full"
+              className="flex items-center space-x-2 px-4 py-2 bg-bg-primary border border-border rounded-full"
               whileHover={{ scale: 1.05 }}
             >
-              <Zap className="w-4 h-4 text-primary" />
-              <span className="text-sm">Powered by GPT-4o</span>
+              <Zap className="w-4 h-4 text-accent-blue" />
+              <span className="text-sm text-text-primary">Powered by GPT-4o</span>
             </motion.div>
           </div>
         </div>
@@ -263,18 +266,15 @@ This assessment aligns with Basel III operational risk management requirements a
             transition={{ delay: 0.2, duration: 0.6 }}
             className="lg:col-span-2 space-y-6"
           >
-            <div className="glass rounded-2xl p-6 h-full border border-primary/25 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-40 blur-sm"></div>
-              <div className="relative z-10">
-              <h2 className="text-xl font-semibold mb-6 flex items-center">
-                <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
+            <div className="glass p-6 h-full">
+              <h2 className="text-xl font-semibold mb-6 flex items-center text-text-primary">
+                <AlertTriangle className="w-5 h-5 mr-2 text-accent-blue" />
                 Transaction Analysis
               </h2>
               <TransactionForm 
                 onSubmit={analyzeTransaction}
                 isLoading={isLoading}
               />
-              </div>
             </div>
           </motion.div>
 
@@ -288,15 +288,13 @@ This assessment aligns with Basel III operational risk management requirements a
           >
             
             {/* Risk Score Ring */}
-            <div className="glass rounded-2xl p-6 border border-primary/25 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-40 blur-sm"></div>
-              <div className="relative z-10">
+            <div className="glass p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Risk Assessment</h3>
+                <h3 className="text-lg font-semibold text-text-primary">Risk Assessment</h3>
                 {analysisResult && (
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-400">Case ID:</span>
-                    <span className="text-sm font-mono">{analysisResult.case_id}</span>
+                    <span className="text-sm text-text-secondary">Case ID:</span>
+                    <span className="text-sm font-mono text-text-primary">{analysisResult.case_id}</span>
                   </div>
                 )}
               </div>
@@ -306,15 +304,12 @@ This assessment aligns with Basel III operational risk management requirements a
                 riskLevel={analysisResult?.risk_level || 'LOW'}
                 isLoading={isLoading}
               />
-              </div>
             </div>
 
             {/* SHAP Chart */}
-            <div className="glass rounded-2xl p-6 border border-primary/25 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-40 blur-sm"></div>
-              <div className="relative z-10">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <CheckCircle className="w-5 h-5 mr-2 text-primary" />
+            <div className="glass p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center text-text-primary">
+                <CheckCircle className="w-5 h-5 mr-2 text-accent-blue" />
                 Feature Contributions
               </h3>
               
@@ -322,18 +317,15 @@ This assessment aligns with Basel III operational risk management requirements a
                 features={analysisResult?.top_features || []}
                 isLoading={isLoading}
               />
-              </div>
             </div>
 
             {/* Audit Narrative */}
-            <div className="glass rounded-2xl p-6 border border-primary/25 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-40 blur-sm"></div>
-              <div className="relative z-10">
+            <div className="glass p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <Clock className="w-5 h-5 mr-2 text-primary" />
-                  <h3 className="text-lg font-semibold">AI Audit Report</h3>
-                  <div className="ml-2 px-2 py-1 bg-primary/20 text-primary rounded text-xs">
+                  <Clock className="w-5 h-5 mr-2 text-accent-blue" />
+                  <h3 className="text-lg font-semibold text-text-primary">AI Audit Report</h3>
+                  <div className="ml-2 px-2 py-1 bg-bg-tertiary border border-border text-text-secondary rounded text-xs">
                     GPT-4o
                   </div>
                 </div>
@@ -342,19 +334,19 @@ This assessment aligns with Basel III operational risk management requirements a
                   <motion.button
                     onClick={exportPDF}
                     disabled={isExporting}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 rounded-lg transition-all ripple disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                    className="flex items-center space-x-2 px-4 py-2 bg-accent-blue hover:bg-accent-blue-hover rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-hover"
                     whileHover={{ scale: isExporting ? 1 : 1.05 }}
                     whileTap={{ scale: isExporting ? 1 : 0.95 }}
                   >
                     {isExporting ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Exporting...</span>
+                        <span className="text-white">Exporting...</span>
                       </>
                     ) : (
                       <>
-                        <Download className="w-4 h-4" />
-                        <span>Export PDF</span>
+                        <Download className="w-4 h-4 text-white" />
+                        <span className="text-white">Export PDF</span>
                       </>
                     )}
                   </motion.button>
@@ -368,7 +360,6 @@ This assessment aligns with Basel III operational risk management requirements a
                 timestamp={analysisResult?.timestamp || ''}
                 isLoading={isLoading}
               />
-              </div>
             </div>
           </motion.div>
         </div>

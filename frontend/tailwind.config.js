@@ -8,12 +8,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#0f0f1a',
-        card: '#1a1a2e',
-        primary: '#4f8ff7',
-        'high-risk': '#ff4757',
-        'medium-risk': '#ffa502',
-        'low-risk': '#2ed573',
+        background: '#0a0a0a',
+        card: '#111111',
+        primary: '#2563eb',
+        'high-risk': '#ef4444',
+        'medium-risk': '#f59e0b',
+        'low-risk': '#22c55e',
+        'bg-primary': '#0a0a0a',
+        'bg-secondary': '#111111',
+        'bg-tertiary': '#1a1a1a',
+        'border': '#222222',
+        'border-hover': '#333333',
+        'text-primary': '#ffffff',
+        'text-secondary': '#888888',
+        'text-tertiary': '#555555',
+        'accent-blue': '#2563eb',
+        'accent-blue-hover': '#1d4ed8',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

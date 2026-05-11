@@ -3,15 +3,16 @@ FraudGuard AI - FastAPI Backend
 Production-grade fraud detection API with LLM-powered audit narratives.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from typing import Dict, List, Any, Optional
 import uuid
 from datetime import datetime
 import asyncio
 import os
+import json
 
 from model.predict import get_predictor
 from llm.narrative import get_narrative_generator
@@ -139,24 +140,26 @@ async def analyze_transaction(transaction: TransactionInput):
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 @app.post("/export-pdf")
-async def export_pdf_report(request: Dict[str, Any]):
+async def export_pdf_report(request: Request):
     """
     Export analysis result as Basel III compliant PDF report.
     
     Args:
-        request: Analysis result data to export
+        request: Raw request with analysis result data
         
     Returns:
         Response with PDF file
     """
     try:
-        # Handle both nested and direct analysis_result formats
-        analysis_data = request.get('analysis_result', request)
+        # Get raw JSON body
+        body = await request.json()
+        print(f"PDF Export Request Body: {json.dumps(body, indent=2)}")
         
         # Generate PDF report
-        return generate_pdf_report(analysis_data)
+        return generate_pdf_report(body)
         
     except Exception as e:
+        print(f"PDF Export Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"PDF export failed: {str(e)}")
 
 @app.get("/demo-data")
