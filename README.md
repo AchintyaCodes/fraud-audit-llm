@@ -5,21 +5,22 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-14+-black.svg)](https://nextjs.org)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-orange.svg)](https://openai.com)
+[![Groq](https://img.shields.io/badge/Groq-Llama--3.3-orange.svg)](https://groq.com)
 [![XGBoost](https://img.shields.io/badge/XGBoost-2.0+-red.svg)](https://xgboost.readthedocs.io)
 [![Vercel](https://img.shields.io/badge/Deploy-Vercel-black.svg)](https://vercel.com)
 
-**FraudGuard AI** extends traditional XGBoost fraud detection with GPT-4o to automatically generate regulatory-compliant audit narratives. Built for financial institutions requiring Basel III compliance and explainable AI.
+**FraudGuard AI** extends traditional XGBoost fraud detection with Groq Llama 3.3 to automatically generate regulatory-compliant audit narratives. Built for financial institutions requiring Basel III compliance and explainable AI.
 
 ## ✨ Features
 
-- 🤖 **AI-Powered Analysis**: XGBoost model with GPT-4o narrative generation
+- 🤖 **AI-Powered Analysis**: XGBoost model with Groq Llama 3.3 narrative generation
 - 📊 **Real-time Dashboard**: Bloomberg Terminal-inspired dark theme interface
 - 🔍 **Explainable AI**: SHAP-like feature importance visualization
 - 📋 **Regulatory Compliance**: Basel III compliant PDF audit reports
 - ⚡ **Production Ready**: FastAPI backend with Next.js frontend
-- 🎨 **Stunning UI**: Glassmorphism design with smooth animations
+- 🎨 **Stunning UI**: Professional dark theme with smooth animations
 - 🔄 **Demo Mode**: Works without API keys for demonstrations
+- 💰 **Free LLM**: Uses Groq's free and fast Llama 3.3 API
 
 ## 🏗️ Architecture
 
@@ -28,7 +29,7 @@ fraud-audit-llm/
 ├── backend/                 # FastAPI Python backend
 │   ├── main.py             # FastAPI application
 │   ├── model/              # ML model and prediction logic
-│   ├── llm/                # GPT-4o narrative generation
+│   ├── llm/                # Groq Llama 3.3 narrative generation
 │   ├── utils/              # PDF export utilities
 │   └── requirements.txt    # Python dependencies
 ├── frontend/               # Next.js React frontend
@@ -44,7 +45,7 @@ fraud-audit-llm/
 
 - Python 3.8+
 - Node.js 18+
-- OpenAI API key (optional for demo mode)
+- Groq API key (optional for demo mode)
 
 ### Backend Setup
 
@@ -71,10 +72,10 @@ The dashboard will be available at `http://localhost:3000`
 Create `backend/.env`:
 
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
-> **Note**: The application works in demo mode without an OpenAI API key
+> **Note**: The application works in demo mode without a Groq API key. Get your free API key at [console.groq.com](https://console.groq.com)
 
 ## 📊 API Endpoints
 
@@ -105,7 +106,7 @@ curl -X POST http://localhost:8000/analyze \
 ### Backend
 - **FastAPI**: High-performance Python web framework
 - **XGBoost**: Gradient boosting for fraud detection
-- **OpenAI GPT-4o**: LLM for audit narrative generation
+- **Groq Llama 3.3**: Fast and free LLM for audit narrative generation
 - **FPDF2**: PDF report generation
 - **Pydantic**: Data validation and serialization
 
@@ -141,7 +142,7 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py
     envVars:
-      - key: OPENAI_API_KEY
+      - key: GROQ_API_KEY
         sync: false
 ```
 

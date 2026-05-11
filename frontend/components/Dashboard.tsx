@@ -249,7 +249,7 @@ This assessment aligns with Basel III operational risk management requirements a
               whileHover={{ scale: 1.05 }}
             >
               <Zap className="w-4 h-4 text-accent-blue" />
-              <span className="text-sm text-text-primary">Powered by GPT-4o</span>
+              <span className="text-sm text-text-primary">Powered by Llama 3.3</span>
             </motion.div>
           </div>
         </div>
@@ -326,7 +326,7 @@ This assessment aligns with Basel III operational risk management requirements a
                   <Clock className="w-5 h-5 mr-2 text-accent-blue" />
                   <h3 className="text-lg font-semibold text-text-primary">AI Audit Report</h3>
                   <div className="ml-2 px-2 py-1 bg-bg-tertiary border border-border text-text-secondary rounded text-xs">
-                    GPT-4o
+                    Llama 3.3
                   </div>
                 </div>
                 

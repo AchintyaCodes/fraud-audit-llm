@@ -1,10 +1,10 @@
 """
-LLM-powered audit narrative generation using OpenAI GPT-4o.
+LLM-powered audit narrative generation using Groq Llama 3.3.
 """
 
 import os
 from typing import Dict, List, Any
-from openai import OpenAI
+from groq import Groq
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -12,24 +12,24 @@ load_dotenv()
 
 class NarrativeGenerator:
     """
-    Generate regulatory-compliant audit narratives using GPT-4o.
+    Generate regulatory-compliant audit narratives using Groq Llama 3.3.
     """
     
     def __init__(self):
         """Initialize the narrative generator."""
-        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.api_key = os.getenv("GROQ_API_KEY")
         self.client = None
         self.demo_mode = False
         
-        if self.api_key and self.api_key != "your_openai_api_key_here":
+        if self.api_key and self.api_key != "your_groq_api_key_here":
             try:
-                self.client = OpenAI(api_key=self.api_key)
-                print("✓ OpenAI client initialized successfully")
+                self.client = Groq(api_key=self.api_key)
+                print("✓ Groq client initialized successfully")
             except Exception as e:
-                print(f"Warning: OpenAI initialization failed: {e}")
+                print(f"Warning: Groq initialization failed: {e}")
                 self.demo_mode = True
         else:
-            print("ℹ️  Running in demo mode - OpenAI API key not configured")
+            print("ℹ️  Running in demo mode - Groq API key not configured")
             self.demo_mode = True
     
     def _get_system_prompt(self) -> str:
@@ -161,20 +161,19 @@ Risk assessment completed in accordance with Basel III operational risk standard
             user_prompt = self._create_user_prompt(fraud_score, risk_level, top_features)
             
             response = self.client.chat.completions.create(
-                model="gpt-4o",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                max_tokens=300,
-                temperature=0.3,
-                top_p=0.9
+                max_tokens=500,
+                temperature=0.3
             )
             
             return response.choices[0].message.content.strip()
             
         except Exception as e:
-            print(f"Error generating narrative with OpenAI: {e}")
+            print(f"Error generating narrative with Groq: {e}")
             print("Falling back to mock narrative...")
             return self._get_mock_narrative(fraud_score, risk_level, top_features)
 
