@@ -122,7 +122,19 @@ def generate_pdf_report(analysis_data: Dict[str, Any]) -> Response:
     if isinstance(top_features, list):
         for feature in top_features[:6]:
             if isinstance(feature, dict):
-                feature_name = safe_str(feature.get('feature', 'Unknown')).replace('_', ' ').title()
+                raw_feature_name = safe_str(feature.get('feature', 'Unknown'))
+                
+                # Map V feature names to human-readable labels
+                feature_map = {
+                    'V14': 'Behavioral Score A',
+                    'V10': 'Behavioral Score B',
+                    'V12': 'Behavioral Score C',
+                    'V4': 'Network Pattern',
+                    'V17': 'Transaction Velocity',
+                    'Amount': 'Transaction Amount'
+                }
+                
+                feature_name = feature_map.get(raw_feature_name, raw_feature_name.replace('_', ' ').title())
                 shap_val = feature.get('shap_value', 0)
                 contribution = safe_str(feature.get('contribution', 'unknown'))
                 

@@ -68,8 +68,20 @@ Write 150-200 words total. Use formal banking language but ensure technical conc
         Returns:
             Formatted user prompt
         """
+        # Replace V feature names with human-readable labels
+        def format_feature_name(feature_name: str) -> str:
+            feature_map = {
+                'V14': 'Behavioral Score A',
+                'V10': 'Behavioral Score B',
+                'V12': 'Behavioral Score C',
+                'V4': 'Network Pattern',
+                'V17': 'Transaction Velocity',
+                'Amount': 'Transaction Amount'
+            }
+            return feature_map.get(feature_name, feature_name.replace('_', ' ').title())
+        
         features_text = "\n".join([
-            f"- {feat['feature'].replace('_', ' ').title()}: "
+            f"- {format_feature_name(feat['feature'])}: "
             f"{feat['shap_value']:.4f} ({'increases' if feat['contribution'] == 'fraud' else 'decreases'} fraud risk)"
             for feat in top_features[:3]
         ])
@@ -96,14 +108,26 @@ Please generate a regulatory audit narrative for this transaction analysis."""
         Returns:
             Mock audit narrative in plain text format
         """
+        # Replace V feature names with human-readable labels
+        def format_feature_name(feature_name: str) -> str:
+            feature_map = {
+                'V14': 'Behavioral Score A',
+                'V10': 'Behavioral Score B',
+                'V12': 'Behavioral Score C',
+                'V4': 'Network Pattern',
+                'V17': 'Transaction Velocity',
+                'Amount': 'Transaction Amount'
+            }
+            return feature_map.get(feature_name, feature_name.replace('_', ' ').title())
+        
         if risk_level == "HIGH":
             return f"""RISK ASSESSMENT SUMMARY
 This transaction exhibits a {fraud_score:.1%} probability of fraudulent activity, classified as HIGH RISK. The elevated risk score warrants immediate attention and enhanced due diligence procedures. Multiple fraud indicators align with known suspicious activity patterns.
 
 PRIMARY RISK DRIVERS
-1. {top_features[0]['feature'].replace('_', ' ').title()}: Significantly elevated beyond normal parameters, indicating potential suspicious activity patterns that deviate from established customer behavioral baselines.
-2. {top_features[1]['feature'].replace('_', ' ').title()}: Presents concerning risk indicators that align with known fraud typologies and suggest anomalous transaction characteristics requiring investigation.
-3. {top_features[2]['feature'].replace('_', ' ').title()}: Demonstrates characteristics inconsistent with legitimate transaction patterns, contributing substantially to the overall fraud risk assessment.
+1. {format_feature_name(top_features[0]['feature'])}: Significantly elevated beyond normal parameters, indicating potential suspicious activity patterns that deviate from established customer behavioral baselines.
+2. {format_feature_name(top_features[1]['feature'])}: Presents concerning risk indicators that align with known fraud typologies and suggest anomalous transaction characteristics requiring investigation.
+3. {format_feature_name(top_features[2]['feature'])}: Demonstrates characteristics inconsistent with legitimate transaction patterns, contributing substantially to the overall fraud risk assessment.
 
 RECOMMENDED ACTION: BLOCK
 Transaction should be blocked pending manual review and customer verification. Implement enhanced authentication protocols and conduct thorough investigation before processing.
@@ -116,9 +140,9 @@ This assessment aligns with Basel III operational risk management requirements a
 This transaction presents a {fraud_score:.1%} probability of fraudulent activity, classified as MEDIUM RISK. While not immediately concerning, the transaction requires additional monitoring and verification procedures. Several risk indicators warrant closer examination.
 
 PRIMARY RISK DRIVERS
-1. {top_features[0]['feature'].replace('_', ' ').title()}: Shows moderate deviation from typical customer patterns, requiring closer examination and additional verification steps.
-2. {top_features[1]['feature'].replace('_', ' ').title()}: Presents some risk indicators that warrant additional scrutiny and enhanced monitoring protocols.
-3. {top_features[2]['feature'].replace('_', ' ').title()}: Exhibits characteristics that, while not definitively fraudulent, require ongoing observation and assessment.
+1. {format_feature_name(top_features[0]['feature'])}: Shows moderate deviation from typical customer patterns, requiring closer examination and additional verification steps.
+2. {format_feature_name(top_features[1]['feature'])}: Presents some risk indicators that warrant additional scrutiny and enhanced monitoring protocols.
+3. {format_feature_name(top_features[2]['feature'])}: Exhibits characteristics that, while not definitively fraudulent, require ongoing observation and assessment.
 
 RECOMMENDED ACTION: FLAG FOR REVIEW
 Transaction may proceed with enhanced monitoring and additional verification steps. Maintain heightened surveillance for subsequent activities and implement secondary authentication measures.
@@ -131,9 +155,9 @@ Assessment conducted in accordance with Basel III risk management frameworks and
 This transaction demonstrates a {fraud_score:.1%} probability of fraudulent activity, classified as LOW RISK. The transaction profile aligns with established customer patterns and presents minimal risk indicators. Standard processing procedures are appropriate.
 
 PRIMARY RISK DRIVERS
-1. {top_features[0]['feature'].replace('_', ' ').title()}: Within normal parameters and consistent with historical customer behavior patterns, contributing to the low-risk assessment.
-2. {top_features[1]['feature'].replace('_', ' ').title()}: Demonstrates characteristics typical of legitimate transaction activity with no concerning anomalies detected.
-3. {top_features[2]['feature'].replace('_', ' ').title()}: Aligns with expected transaction patterns for this customer segment and risk profile category.
+1. {format_feature_name(top_features[0]['feature'])}: Within normal parameters and consistent with historical customer behavior patterns, contributing to the low-risk assessment.
+2. {format_feature_name(top_features[1]['feature'])}: Demonstrates characteristics typical of legitimate transaction activity with no concerning anomalies detected.
+3. {format_feature_name(top_features[2]['feature'])}: Aligns with expected transaction patterns for this customer segment and risk profile category.
 
 RECOMMENDED ACTION: APPROVE
 Transaction approved for processing with standard monitoring procedures. No additional controls required at this time, continue with normal operational oversight.

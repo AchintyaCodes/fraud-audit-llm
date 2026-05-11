@@ -308,7 +308,7 @@ This assessment aligns with Basel III operational risk management requirements a
           >
             
             {/* Risk Score Ring */}
-            <div className="glass p-6">
+            <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-text-primary">Risk Assessment</h3>
                 {analysisResult && (
