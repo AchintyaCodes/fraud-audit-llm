@@ -51,42 +51,43 @@ const Dashboard: React.FC = () => {
         if (!response.ok) throw new Error('Backend unavailable')
         const data = await response.json()
         setDemoMode(data.services.llm_service === 'demo_mode')
+        console.log('✓ Backend connected:', data)
       } catch (error) {
-        console.log('Backend unavailable, using demo mode')
+        console.log('⚠️ Backend unavailable, will use demo mode for analysis')
         setDemoMode(true)
-        // Load demo data for immediate visual impact
-        loadDemoData()
+        // DON'T load demo data here - only when user submits form
       }
     }
     checkBackend()
   }, [])
 
   const loadDemoData = () => {
+    console.log('🎭 Loading frontend demo data as fallback')
     const mockResult: AnalysisResult = {
       case_id: 'FA-DEMO123',
       timestamp: new Date().toISOString(),
-      fraud_probability: 0.87,
+      fraud_probability: 0.78,
       risk_level: 'HIGH',
       top_features: [
         { feature: 'transaction_amount', shap_value: 0.45, contribution: 'fraud', abs_value: 0.45 },
-        { feature: 'device_risk_score', shap_value: 0.32, contribution: 'fraud', abs_value: 0.32 },
-        { feature: 'location_mismatch', shap_value: 0.28, contribution: 'fraud', abs_value: 0.28 },
-        { feature: 'previous_fraud_history', shap_value: 0.21, contribution: 'fraud', abs_value: 0.21 },
-        { feature: 'time_of_day', shap_value: 0.18, contribution: 'fraud', abs_value: 0.18 },
-        { feature: 'merchant_category', shap_value: -0.12, contribution: 'legitimate', abs_value: 0.12 }
+        { feature: 'device_risk_score', shap_value: 0.34, contribution: 'fraud', abs_value: 0.34 },
+        { feature: 'location_mismatch', shap_value: 0.35, contribution: 'fraud', abs_value: 0.35 },
+        { feature: 'previous_fraud_history', shap_value: 0.40, contribution: 'fraud', abs_value: 0.40 },
+        { feature: 'time_of_day', shap_value: 0.20, contribution: 'fraud', abs_value: 0.20 },
+        { feature: 'merchant_category', shap_value: 0.15, contribution: 'fraud', abs_value: 0.15 }
       ],
-      audit_narrative: `**Risk Assessment Summary**
-This transaction exhibits an 87% probability of fraudulent activity, classified as HIGH RISK. The elevated risk score warrants immediate attention and enhanced due diligence procedures.
+      audit_narrative: `RISK ASSESSMENT SUMMARY
+This transaction exhibits a 78% probability of fraudulent activity, classified as HIGH RISK. The elevated risk score warrants immediate attention and enhanced due diligence procedures.
 
-**Primary Risk Drivers**
-1. **Transaction Amount**: Significantly elevated beyond normal parameters, indicating potential suspicious activity patterns.
-2. **Device Risk Score**: Deviates from established customer behavioral baselines, suggesting anomalous transaction characteristics.
-3. **Location Mismatch**: Presents concerning risk indicators that align with known fraud typologies.
+PRIMARY RISK DRIVERS
+1. Transaction Amount: Significantly elevated beyond normal parameters, indicating potential suspicious activity patterns.
+2. Previous Fraud History: Customer has documented fraud history requiring enhanced monitoring protocols.
+3. Location Mismatch: Transaction originates from unusual geographic location inconsistent with customer patterns.
 
-**Recommended Action: BLOCK**
+RECOMMENDED ACTION: BLOCK
 Transaction should be blocked pending manual review and customer verification. Implement enhanced authentication protocols before processing.
 
-**Regulatory Compliance**
+REGULATORY COMPLIANCE
 This assessment aligns with Basel III operational risk management requirements and AML/CFT regulatory standards. Documentation retained per regulatory retention policies.`,
       recommended_action: 'BLOCK'
     }
@@ -97,48 +98,41 @@ This assessment aligns with Basel III operational risk management requirements a
     setIsLoading(true)
     
     try {
-      if (demoMode && !analysisResult) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        loadDemoData()
-        toast.success('Analysis complete (Demo Mode)')
-        
-        // Scroll to results on mobile
-        setTimeout(() => {
-          const resultsSection = document.getElementById('results-section')
-          if (resultsSection && window.innerWidth < 1024) {
-            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }
-        }, 500)
-      } else {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-        const response = await fetch(`${apiUrl}/analyze`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(transactionData),
-        })
+      // ALWAYS try backend first, regardless of demo mode
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      console.log('🔄 Calling backend API:', `${apiUrl}/analyze`)
+      
+      const response = await fetch(`${apiUrl}/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transactionData),
+      })
 
-        if (!response.ok) {
-          throw new Error('Analysis failed')
-        }
-
-        const result = await response.json()
-        setAnalysisResult(result)
-        toast.success('Analysis complete')
-        
-        // Scroll to results on mobile
-        setTimeout(() => {
-          const resultsSection = document.getElementById('results-section')
-          if (resultsSection && window.innerWidth < 1024) {
-            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }
-        }, 500)
+      if (!response.ok) {
+        throw new Error(`Backend returned ${response.status}`)
       }
+
+      const result = await response.json()
+      console.log('✅ Backend response:', result)
+      setAnalysisResult(result)
+      toast.success('Analysis complete')
+      
+      // Scroll to results on mobile
+      setTimeout(() => {
+        const resultsSection = document.getElementById('results-section')
+        if (resultsSection && window.innerWidth < 1024) {
+          resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 500)
+      
     } catch (error) {
-      console.error('Analysis error:', error)
-      toast.error('Analysis failed - using demo data')
+      console.error('❌ Backend API failed:', error)
+      console.log('🎭 Falling back to frontend demo mode')
+      
+      // Only use frontend demo as absolute last resort
+      toast.error('Backend unavailable - using demo data')
       loadDemoData()
       
       // Scroll to results on mobile even for demo data
