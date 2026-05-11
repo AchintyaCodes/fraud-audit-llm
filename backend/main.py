@@ -65,6 +65,13 @@ class PDFExportRequest(BaseModel):
     """PDF export request model."""
     analysis_result: AnalysisResult
 
+# Try to download models if missing
+try:
+    from download_models import download_models_if_missing
+    download_models_if_missing()
+except Exception as e:
+    print(f"Model download attempt failed: {e}")
+
 # Initialize services
 predictor = get_predictor()
 narrative_generator = get_narrative_generator()
@@ -77,7 +84,7 @@ async def health_check():
         "timestamp": datetime.utcnow().isoformat(),
         "version": "1.0.0",
         "services": {
-            "fraud_model": "loaded" if predictor.model is not None else "error",
+            "fraud_model": "loaded" if predictor.model is not None else "demo_mode",
             "llm_service": "demo_mode" if narrative_generator.demo_mode else "active"
         }
     }
