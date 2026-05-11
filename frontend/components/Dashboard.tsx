@@ -159,7 +159,7 @@ This assessment aligns with Basel III operational risk management requirements a
       
       const response = await axios.post(
         'http://localhost:8000/export-pdf',
-        { analysis_result: analysisResult },
+        analysisResult,  // Send analysisResult directly, not nested
         { responseType: 'blob' }
       )
 
@@ -263,8 +263,8 @@ This assessment aligns with Basel III operational risk management requirements a
             transition={{ delay: 0.2, duration: 0.6 }}
             className="lg:col-span-2 space-y-6"
           >
-            <div className="glass rounded-2xl p-6 h-full border border-primary/15 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-30 blur-sm"></div>
+            <div className="glass rounded-2xl p-6 h-full border border-primary/25 relative overflow-hidden">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-40 blur-sm"></div>
               <div className="relative z-10">
               <h2 className="text-xl font-semibold mb-6 flex items-center">
                 <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
@@ -288,8 +288,8 @@ This assessment aligns with Basel III operational risk management requirements a
           >
             
             {/* Risk Score Ring */}
-            <div className="glass rounded-2xl p-6 border border-primary/15 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-30 blur-sm"></div>
+            <div className="glass rounded-2xl p-6 border border-primary/25 relative overflow-hidden">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-40 blur-sm"></div>
               <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Risk Assessment</h3>
@@ -310,8 +310,8 @@ This assessment aligns with Basel III operational risk management requirements a
             </div>
 
             {/* SHAP Chart */}
-            <div className="glass rounded-2xl p-6 border border-primary/15 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-30 blur-sm"></div>
+            <div className="glass rounded-2xl p-6 border border-primary/25 relative overflow-hidden">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-40 blur-sm"></div>
               <div className="relative z-10">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <CheckCircle className="w-5 h-5 mr-2 text-primary" />
@@ -326,8 +326,8 @@ This assessment aligns with Basel III operational risk management requirements a
             </div>
 
             {/* Audit Narrative */}
-            <div className="glass rounded-2xl p-6 border border-primary/15 relative overflow-hidden">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-30 blur-sm"></div>
+            <div className="glass rounded-2xl p-6 border border-primary/25 relative overflow-hidden">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-40 blur-sm"></div>
               <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
@@ -342,7 +342,7 @@ This assessment aligns with Basel III operational risk management requirements a
                   <motion.button
                     onClick={exportPDF}
                     disabled={isExporting}
-                    className="flex items-center space-x-2 px-4 py-2 bg-primary hover:bg-primary/80 rounded-lg transition-colors ripple disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 rounded-lg transition-all ripple disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                     whileHover={{ scale: isExporting ? 1 : 1.05 }}
                     whileTap={{ scale: isExporting ? 1 : 0.95 }}
                   >

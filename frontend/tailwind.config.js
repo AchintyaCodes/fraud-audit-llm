@@ -8,12 +8,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#0a0a0f',
-        card: '#111118',
-        primary: '#3b82f6',
-        'high-risk': '#ef4444',
-        'medium-risk': '#f59e0b',
-        'low-risk': '#22c55e',
+        background: '#0f0f1a',
+        card: '#1a1a2e',
+        primary: '#4f8ff7',
+        'high-risk': '#ff4757',
+        'medium-risk': '#ffa502',
+        'low-risk': '#2ed573',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

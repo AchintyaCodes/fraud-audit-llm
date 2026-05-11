@@ -139,19 +139,22 @@ async def analyze_transaction(transaction: TransactionInput):
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 @app.post("/export-pdf")
-async def export_pdf_report(request: PDFExportRequest):
+async def export_pdf_report(request: Dict[str, Any]):
     """
     Export analysis result as Basel III compliant PDF report.
     
     Args:
-        request: Analysis result to export
+        request: Analysis result data to export
         
     Returns:
-        StreamingResponse with PDF file
+        Response with PDF file
     """
     try:
-        # Generate PDF report as StreamingResponse
-        return generate_pdf_report(request.analysis_result.dict())
+        # Handle both nested and direct analysis_result formats
+        analysis_data = request.get('analysis_result', request)
+        
+        # Generate PDF report
+        return generate_pdf_report(analysis_data)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PDF export failed: {str(e)}")
