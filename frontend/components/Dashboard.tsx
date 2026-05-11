@@ -28,12 +28,35 @@ interface AnalysisResult {
 }
 
 interface TransactionData {
-  transaction_amount: number
-  merchant_category: number
-  time_of_day: number
-  location_mismatch: boolean
-  previous_fraud_history: boolean
-  device_risk_score: number
+  amount: number
+  v1?: number
+  v2?: number
+  v3?: number
+  v4?: number
+  v5?: number
+  v6?: number
+  v7?: number
+  v8?: number
+  v9?: number
+  v10?: number
+  v11?: number
+  v12?: number
+  v13?: number
+  v14?: number
+  v15?: number
+  v16?: number
+  v17?: number
+  v18?: number
+  v19?: number
+  v20?: number
+  v21?: number
+  v22?: number
+  v23?: number
+  v24?: number
+  v25?: number
+  v26?: number
+  v27?: number
+  v28?: number
 }
 
 const Dashboard: React.FC = () => {
@@ -66,23 +89,23 @@ const Dashboard: React.FC = () => {
     const mockResult: AnalysisResult = {
       case_id: 'FA-DEMO123',
       timestamp: new Date().toISOString(),
-      fraud_probability: 0.78,
+      fraud_probability: 0.85,
       risk_level: 'HIGH',
       top_features: [
-        { feature: 'transaction_amount', shap_value: 0.45, contribution: 'fraud', abs_value: 0.45 },
-        { feature: 'device_risk_score', shap_value: 0.34, contribution: 'fraud', abs_value: 0.34 },
-        { feature: 'location_mismatch', shap_value: 0.35, contribution: 'fraud', abs_value: 0.35 },
-        { feature: 'previous_fraud_history', shap_value: 0.40, contribution: 'fraud', abs_value: 0.40 },
-        { feature: 'time_of_day', shap_value: 0.20, contribution: 'fraud', abs_value: 0.20 },
-        { feature: 'merchant_category', shap_value: 0.15, contribution: 'fraud', abs_value: 0.15 }
+        { feature: 'V14', shap_value: 0.45, contribution: 'fraud', abs_value: 0.45 },
+        { feature: 'Amount', shap_value: 0.34, contribution: 'fraud', abs_value: 0.34 },
+        { feature: 'V10', shap_value: 0.35, contribution: 'fraud', abs_value: 0.35 },
+        { feature: 'V12', shap_value: 0.30, contribution: 'fraud', abs_value: 0.30 },
+        { feature: 'V4', shap_value: 0.25, contribution: 'fraud', abs_value: 0.25 },
+        { feature: 'V17', shap_value: 0.20, contribution: 'fraud', abs_value: 0.20 }
       ],
       audit_narrative: `RISK ASSESSMENT SUMMARY
-This transaction exhibits a 78% probability of fraudulent activity, classified as HIGH RISK. The elevated risk score warrants immediate attention and enhanced due diligence procedures.
+This transaction exhibits an 85% probability of fraudulent activity, classified as HIGH RISK. The elevated risk score warrants immediate attention and enhanced due diligence procedures.
 
 PRIMARY RISK DRIVERS
-1. Transaction Amount: Significantly elevated beyond normal parameters, indicating potential suspicious activity patterns.
-2. Previous Fraud History: Customer has documented fraud history requiring enhanced monitoring protocols.
-3. Location Mismatch: Transaction originates from unusual geographic location inconsistent with customer patterns.
+1. Behavioral Score A (V14): Highly anomalous behavioral pattern indicating potential account compromise or synthetic identity usage.
+2. Transaction Amount: Significantly elevated beyond normal parameters for this customer profile.
+3. Behavioral Score B (V10): Unusual transaction velocity patterns consistent with fraudulent activity.
 
 RECOMMENDED ACTION: BLOCK
 Transaction should be blocked pending manual review and customer verification. Implement enhanced authentication protocols before processing.

@@ -2,240 +2,281 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { DollarSign, Shield, MapPin, History, Smartphone } from 'lucide-react'
-
-interface TransactionData {
-  transaction_amount: number
-  merchant_category: number
-  time_of_day: number
-  location_mismatch: boolean
-  previous_fraud_history: boolean
-  device_risk_score: number
-}
+import { DollarSign, Activity, TrendingUp, Network, Zap } from 'lucide-react'
 
 interface TransactionFormProps {
   onSubmit: (data: TransactionData) => void
   isLoading: boolean
 }
 
-const merchantCategories = [
-  { value: 0, label: 'Grocery Stores' },
-  { value: 1, label: 'Gas Stations' },
-  { value: 2, label: 'Restaurants' },
-  { value: 3, label: 'Retail Stores' },
-  { value: 4, label: 'Online Shopping' },
-  { value: 5, label: 'ATM Withdrawals' },
-  { value: 6, label: 'Hotels' },
-  { value: 7, label: 'Airlines' },
-  { value: 8, label: 'Car Rentals' },
-  { value: 9, label: 'Entertainment' },
-  { value: 10, label: 'Healthcare' },
-  { value: 11, label: 'Insurance' },
-  { value: 12, label: 'Utilities' },
-  { value: 13, label: 'Government' },
-  { value: 14, label: 'Education' },
-  { value: 15, label: 'High-Risk Merchants' },
-  { value: 16, label: 'Gambling' },
-  { value: 17, label: 'Adult Services' },
-  { value: 18, label: 'Cryptocurrency' },
-  { value: 19, label: 'Money Transfer' },
-  { value: 20, label: 'Other' }
-]
+interface TransactionData {
+  amount: number
+  v14: number  // Behavioral Score A
+  v10: number  // Behavioral Score B
+  v12: number  // Behavioral Score C
+  v4: number   // Network Pattern Score
+  v17: number  // Transaction Velocity
+  v1?: number
+  v2?: number
+  v3?: number
+  v5?: number
+  v6?: number
+  v7?: number
+  v8?: number
+  v9?: number
+  v11?: number
+  v13?: number
+  v15?: number
+  v16?: number
+  v18?: number
+  v19?: number
+  v20?: number
+  v21?: number
+  v22?: number
+  v23?: number
+  v24?: number
+  v25?: number
+  v26?: number
+  v27?: number
+  v28?: number
+}
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }) => {
   const [formData, setFormData] = useState<TransactionData>({
-    transaction_amount: 15000,
-    merchant_category: 15,
-    time_of_day: 3.5,
-    location_mismatch: true,
-    previous_fraud_history: true,
-    device_risk_score: 85
+    amount: 2000,
+    v14: -10,
+    v10: -6,
+    v12: -5,
+    v4: -4,
+    v17: -5
   })
-
-  const [focusedField, setFocusedField] = useState<string | null>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
+    
+    // Add all V features with defaults
+    const fullData = {
+      ...formData,
+      v1: 0,
+      v2: 0,
+      v3: 0,
+      v5: 0,
+      v6: 0,
+      v7: 0,
+      v8: 0,
+      v9: 0,
+      v11: 0,
+      v13: 0,
+      v15: 0,
+      v16: 0,
+      v18: 0,
+      v19: 0,
+      v20: 0,
+      v21: 0,
+      v22: 0,
+      v23: 0,
+      v24: 0,
+      v25: 0,
+      v26: 0,
+      v27: 0,
+      v28: 0
+    }
+    
+    onSubmit(fullData)
   }
 
-  const handleInputChange = (field: keyof TransactionData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleSliderChange = (field: keyof TransactionData, value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       
       {/* Transaction Amount */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
+      <div className="space-y-3">
+        <label className="flex items-center text-sm font-medium text-text-primary">
+          <DollarSign className="w-4 h-4 mr-2 text-accent-blue" />
           Transaction Amount ($)
         </label>
         <div className="relative">
-          <DollarSign className="absolute left-3 top-4 w-5 h-5 text-gray-400 z-10" />
           <input
             type="number"
+            value={formData.amount}
+            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+            className="w-full h-14 px-4 bg-bg-tertiary border border-border rounded-lg text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:outline-none transition-colors"
+            placeholder="Enter amount"
+            min="0"
             step="0.01"
-            value={formData.transaction_amount}
-            onChange={(e) => handleInputChange('transaction_amount', parseFloat(e.target.value) || 0)}
-            onFocus={() => setFocusedField('amount')}
-            onBlur={() => setFocusedField(null)}
             disabled={isLoading}
-            className="w-full h-14 pl-12 pr-4 pt-5 pb-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
       </div>
 
-      {/* Merchant Category */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
-          Merchant Category
-        </label>
-        <div className="relative">
-          <Shield className="absolute left-3 top-4 w-5 h-5 text-gray-400 z-10" />
-          <select
-            value={formData.merchant_category}
-            onChange={(e) => handleInputChange('merchant_category', parseInt(e.target.value))}
-            onFocus={() => setFocusedField('merchant')}
-            onBlur={() => setFocusedField(null)}
-            disabled={isLoading}
-            className="w-full h-14 pl-12 pr-4 pt-5 pb-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {merchantCategories.map(category => (
-              <option key={category.value} value={category.value} className="bg-card text-white">
-                {category.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Time of Day */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
-          Time of Day (24hr format)
-        </label>
-        <input
-          type="number"
-          step="0.1"
-          min="0"
-          max="23.9"
-          value={formData.time_of_day}
-          onChange={(e) => handleInputChange('time_of_day', parseFloat(e.target.value) || 0)}
-          onFocus={() => setFocusedField('time')}
-          onBlur={() => setFocusedField(null)}
-          disabled={isLoading}
-          className="w-full h-14 px-4 pt-5 pb-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-        <div className="text-xs text-gray-400">
-          Current: {Math.floor(formData.time_of_day)}:{String(Math.round((formData.time_of_day % 1) * 60)).padStart(2, '0')}
-        </div>
-      </div>
-
-      {/* Location Mismatch Toggle */}
-      <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg min-h-14">
-        <div className="flex items-center space-x-3">
-          <MapPin className="w-5 h-5 text-gray-400" />
-          <div>
-            <div className="font-medium text-white">Location Mismatch</div>
-            <div className="text-sm text-gray-400">Transaction from unusual location</div>
-          </div>
-        </div>
-        <motion.button
-          type="button"
-          onClick={() => handleInputChange('location_mismatch', !formData.location_mismatch)}
-          disabled={isLoading}
-          className={`relative w-12 h-6 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-            formData.location_mismatch ? 'bg-primary' : 'bg-gray-600'
-          }`}
-          whileTap={{ scale: isLoading ? 1 : 0.95 }}
-        >
-          <motion.div
-            className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-md"
-            animate={{ x: formData.location_mismatch ? 26 : 2 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          />
-        </motion.button>
-      </div>
-
-      {/* Previous Fraud History Toggle */}
-      <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg min-h-14">
-        <div className="flex items-center space-x-3">
-          <History className="w-5 h-5 text-gray-400" />
-          <div>
-            <div className="font-medium text-white">Previous Fraud History</div>
-            <div className="text-sm text-gray-400">Customer has fraud history</div>
-          </div>
-        </div>
-        <motion.button
-          type="button"
-          onClick={() => handleInputChange('previous_fraud_history', !formData.previous_fraud_history)}
-          disabled={isLoading}
-          className={`relative w-12 h-6 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-            formData.previous_fraud_history ? 'bg-primary' : 'bg-gray-600'
-          }`}
-          whileTap={{ scale: isLoading ? 1 : 0.95 }}
-        >
-          <motion.div
-            className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-md"
-            animate={{ x: formData.previous_fraud_history ? 26 : 2 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          />
-        </motion.button>
-      </div>
-
-      {/* Device Risk Score Slider */}
+      {/* Behavioral Score A (V14) */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Smartphone className="w-5 h-5 text-gray-400" />
-            <span className="font-medium text-white">Device Risk Score</span>
-          </div>
-          <span className="text-primary font-bold text-lg">{formData.device_risk_score}</span>
-        </div>
-        <div className="text-sm text-gray-400 mb-2">Risk level of the device used</div>
+        <label className="flex items-center text-sm font-medium text-text-primary">
+          <Activity className="w-4 h-4 mr-2 text-accent-blue" />
+          Behavioral Score A
+          <span className="ml-2 text-xs text-text-secondary">({formData.v14})</span>
+        </label>
         <div className="relative">
           <input
             type="range"
-            min="0"
-            max="100"
-            value={formData.device_risk_score}
-            onChange={(e) => handleInputChange('device_risk_score', parseInt(e.target.value))}
-            onFocus={() => setFocusedField('device')}
-            onBlur={() => setFocusedField(null)}
+            min="-10"
+            max="10"
+            step="0.1"
+            value={formData.v14}
+            onChange={(e) => handleSliderChange('v14', parseFloat(e.target.value))}
+            className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer slider"
             disabled={isLoading}
-            className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(to right, #22c55e 0%, #f59e0b 50%, #ef4444 100%)`
-            }}
           />
-          <div 
-            className="absolute top-0 h-2 bg-primary rounded-lg pointer-events-none"
-            style={{ width: `${formData.device_risk_score}%` }}
-          />
+          <div className="flex justify-between text-xs text-text-tertiary mt-1">
+            <span>-10</span>
+            <span>0</span>
+            <span>+10</span>
+          </div>
         </div>
+        <p className="text-xs text-text-tertiary">
+          Anonymized behavioral pattern derived from transaction network analysis
+        </p>
+      </div>
+
+      {/* Behavioral Score B (V10) */}
+      <div className="space-y-3">
+        <label className="flex items-center text-sm font-medium text-text-primary">
+          <TrendingUp className="w-4 h-4 mr-2 text-accent-blue" />
+          Behavioral Score B
+          <span className="ml-2 text-xs text-text-secondary">({formData.v10})</span>
+        </label>
+        <div className="relative">
+          <input
+            type="range"
+            min="-10"
+            max="10"
+            step="0.1"
+            value={formData.v10}
+            onChange={(e) => handleSliderChange('v10', parseFloat(e.target.value))}
+            className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer slider"
+            disabled={isLoading}
+          />
+          <div className="flex justify-between text-xs text-text-tertiary mt-1">
+            <span>-10</span>
+            <span>0</span>
+            <span>+10</span>
+          </div>
+        </div>
+        <p className="text-xs text-text-tertiary">
+          Anonymized behavioral pattern derived from transaction network analysis
+        </p>
+      </div>
+
+      {/* Behavioral Score C (V12) */}
+      <div className="space-y-3">
+        <label className="flex items-center text-sm font-medium text-text-primary">
+          <Activity className="w-4 h-4 mr-2 text-accent-blue" />
+          Behavioral Score C
+          <span className="ml-2 text-xs text-text-secondary">({formData.v12})</span>
+        </label>
+        <div className="relative">
+          <input
+            type="range"
+            min="-10"
+            max="10"
+            step="0.1"
+            value={formData.v12}
+            onChange={(e) => handleSliderChange('v12', parseFloat(e.target.value))}
+            className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer slider"
+            disabled={isLoading}
+          />
+          <div className="flex justify-between text-xs text-text-tertiary mt-1">
+            <span>-10</span>
+            <span>0</span>
+            <span>+10</span>
+          </div>
+        </div>
+        <p className="text-xs text-text-tertiary">
+          Anonymized behavioral pattern derived from transaction network analysis
+        </p>
+      </div>
+
+      {/* Network Pattern Score (V4) */}
+      <div className="space-y-3">
+        <label className="flex items-center text-sm font-medium text-text-primary">
+          <Network className="w-4 h-4 mr-2 text-accent-blue" />
+          Network Pattern Score
+          <span className="ml-2 text-xs text-text-secondary">({formData.v4})</span>
+        </label>
+        <div className="relative">
+          <input
+            type="range"
+            min="-10"
+            max="10"
+            step="0.1"
+            value={formData.v4}
+            onChange={(e) => handleSliderChange('v4', parseFloat(e.target.value))}
+            className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer slider"
+            disabled={isLoading}
+          />
+          <div className="flex justify-between text-xs text-text-tertiary mt-1">
+            <span>-10</span>
+            <span>0</span>
+            <span>+10</span>
+          </div>
+        </div>
+        <p className="text-xs text-text-tertiary">
+          Anonymized behavioral pattern derived from transaction network analysis
+        </p>
+      </div>
+
+      {/* Transaction Velocity (V17) */}
+      <div className="space-y-3">
+        <label className="flex items-center text-sm font-medium text-text-primary">
+          <Zap className="w-4 h-4 mr-2 text-accent-blue" />
+          Transaction Velocity
+          <span className="ml-2 text-xs text-text-secondary">({formData.v17})</span>
+        </label>
+        <div className="relative">
+          <input
+            type="range"
+            min="-10"
+            max="10"
+            step="0.1"
+            value={formData.v17}
+            onChange={(e) => handleSliderChange('v17', parseFloat(e.target.value))}
+            className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer slider"
+            disabled={isLoading}
+          />
+          <div className="flex justify-between text-xs text-text-tertiary mt-1">
+            <span>-10</span>
+            <span>0</span>
+            <span>+10</span>
+          </div>
+        </div>
+        <p className="text-xs text-text-tertiary">
+          Anonymized behavioral pattern derived from transaction network analysis
+        </p>
       </div>
 
       {/* Submit Button */}
-      <div className="pt-6">
-        <motion.button
-          type="submit"
-          disabled={isLoading}
-          className="w-full h-13 bg-gradient-to-r from-[#3b82f6] to-[#2563eb] hover:from-[#2563eb] hover:to-[#3b82f6] text-white font-semibold rounded-xl transition-all duration-300 ripple disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ height: '52px' }}
-          whileHover={{ scale: isLoading ? 1 : 1.02 }}
-          whileTap={{ scale: isLoading ? 1 : 0.98 }}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Analyzing...</span>
-            </div>
-          ) : (
-            'Analyze Transaction'
-          )}
-        </motion.button>
-      </div>
+      <motion.button
+        type="submit"
+        disabled={isLoading}
+        className="w-full h-12 bg-accent-blue hover:bg-accent-blue-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all btn-hover"
+        whileHover={{ scale: isLoading ? 1 : 1.02 }}
+        whileTap={{ scale: isLoading ? 1 : 0.98 }}
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center space-x-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span>Analyzing...</span>
+          </div>
+        ) : (
+          'Analyze Transaction'
+        )}
+      </motion.button>
     </form>
   )
 }

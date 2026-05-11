@@ -8,6 +8,52 @@ import pandas as pd
 from typing import Dict, List, Tuple, Any
 from pathlib import Path
 
+def predict_transaction(input_data: dict, model, scaler):
+    """Predict using the exact Kaggle credit card fraud dataset format"""
+    # Build the exact 30-feature array in the order the model expects:
+    # Time, V1-V28, Amount
+    features = {
+        'Time': 0,
+        'V1': input_data.get('v1', 0),
+        'V2': input_data.get('v2', 0),
+        'V3': input_data.get('v3', 0),
+        'V4': input_data.get('v4', 0),
+        'V5': input_data.get('v5', 0),
+        'V6': input_data.get('v6', 0),
+        'V7': input_data.get('v7', 0),
+        'V8': input_data.get('v8', 0),
+        'V9': input_data.get('v9', 0),
+        'V10': input_data.get('v10', 0),
+        'V11': input_data.get('v11', 0),
+        'V12': input_data.get('v12', 0),
+        'V13': input_data.get('v13', 0),
+        'V14': input_data.get('v14', 0),
+        'V15': input_data.get('v15', 0),
+        'V16': input_data.get('v16', 0),
+        'V17': input_data.get('v17', 0),
+        'V18': input_data.get('v18', 0),
+        'V19': input_data.get('v19', 0),
+        'V20': input_data.get('v20', 0),
+        'V21': input_data.get('v21', 0),
+        'V22': input_data.get('v22', 0),
+        'V23': input_data.get('v23', 0),
+        'V24': input_data.get('v24', 0),
+        'V25': input_data.get('v25', 0),
+        'V26': input_data.get('v26', 0),
+        'V27': input_data.get('v27', 0),
+        'V28': input_data.get('v28', 0),
+        'Amount': input_data.get('amount', 0),
+    }
+    
+    df = pd.DataFrame([features])
+    
+    # Apply scaler only to Amount column
+    if scaler is not None:
+        df['Amount'] = scaler.transform(df[['Amount']])
+    
+    fraud_prob = model.predict_proba(df)[0][1]
+    return float(fraud_prob)
+
 class FraudPredictor:
     """
     Fraud detection model with feature importance analysis.
@@ -34,22 +80,6 @@ class FraudPredictor:
             if Path(self.model_path).exists():
                 self.model = joblib.load(self.model_path)
                 print("✓ Fraud detection model loaded successfully")
-                
-                # Get actual feature names from model
-                try:
-                    if hasattr(self.model, 'feature_names_in_'):
-                        self.feature_names = list(self.model.feature_names_in_)
-                        print(f"✓ Model feature names: {self.feature_names}")
-                    elif hasattr(self.model, 'get_booster'):
-                        booster = self.model.get_booster()
-                        if hasattr(booster, 'feature_names'):
-                            self.feature_names = booster.feature_names
-                            print(f"✓ Booster feature names: {self.feature_names}")
-                    else:
-                        print("⚠️  Could not get feature names from model")
-                except Exception as e:
-                    print(f"Warning: Could not extract feature names: {e}")
-                    
             else:
                 print("⚠️  Model file not found, using demo mode")
                 self.model = None
@@ -58,9 +88,6 @@ class FraudPredictor:
             if Path(self.scaler_path).exists():
                 self.scaler = joblib.load(self.scaler_path)
                 print("✓ Scaler loaded successfully")
-                if hasattr(self.scaler, 'feature_names_in_'):
-                    print(f"✓ Scaler expects features: {list(self.scaler.feature_names_in_)}")
-                print(f"✓ Scaler expects {self.scaler.n_features_in_} features")
             else:
                 print("⚠️  Scaler file not found")
                 self.scaler = None
@@ -71,85 +98,23 @@ class FraudPredictor:
             self.model = None
             self.scaler = None
     
-    def _prepare_features(self, transaction_data: Dict[str, Any]) -> np.ndarray:
-        """
-        Convert transaction data to model features in the correct order.
-        
-        Args:
-            transaction_data: Dictionary containing transaction information
-            
-        Returns:
-            Feature array ready for model prediction
-        """
-        # If we have the actual feature names from the model, use them
-        if self.feature_names:
-            expected_features = len(self.feature_names)
-        elif self.scaler and hasattr(self.scaler, 'n_features_in_'):
-            expected_features = self.scaler.n_features_in_
-        else:
-            expected_features = 6  # Fallback to input features only
-        
-        print(f"Preparing {expected_features} features for model")
-        
-        # Create feature array
-        features = np.zeros(expected_features)
-        
-        # Map the 6 input fields to the first 6 positions
-        # This assumes the model was trained with these as the first 6 features
-        input_mapping = [
-            "transaction_amount",
-            "merchant_category", 
-            "time_of_day",
-            "location_mismatch",
-            "previous_fraud_history",
-            "device_risk_score"
-        ]
-        
-        # Fill in the provided features
-        for i, field_name in enumerate(input_mapping):
-            if i < expected_features and field_name in transaction_data:
-                value = transaction_data[field_name]
-                # Convert boolean to float
-                if isinstance(value, bool):
-                    value = float(value)
-                features[i] = value
-                print(f"Feature {i} ({field_name}): {value}")
-        
-        # If model expects more features, fill with zeros (or reasonable defaults)
-        if expected_features > 6:
-            print(f"Filling remaining {expected_features - 6} features with zeros")
-        
-        return features.reshape(1, -1)
-    
-    def _get_shap_values(self, scaled_features: np.ndarray) -> List[Dict[str, Any]]:
+    def _get_shap_values(self, df: pd.DataFrame) -> List[Dict[str, Any]]:
         """
         Calculate SHAP values for feature importance.
-        
-        Args:
-            scaled_features: Scaled input features
-            
-        Returns:
-            List of feature importance dictionaries with proper SHAP values
         """
         try:
             import shap
             
-            # Create SHAP explainer for tree model
             explainer = shap.TreeExplainer(self.model)
+            shap_values = explainer.shap_values(df)
             
-            # Calculate SHAP values on scaled input
-            shap_values = explainer.shap_values(scaled_features)
-            
-            # Handle different SHAP output formats
             if isinstance(shap_values, list):
-                # Binary classification - use positive class (fraud)
                 shap_vals = shap_values[1] if len(shap_values) > 1 else shap_values[0]
             else:
                 shap_vals = shap_values
             
-            # Create feature importance list
             feature_importance = []
-            feature_names = self.feature_names or [f"feature_{i}" for i in range(len(shap_vals[0]))]
+            feature_names = df.columns.tolist()
             
             for i, (feature_name, shap_val) in enumerate(zip(feature_names, shap_vals[0])):
                 contribution = "fraud" if shap_val > 0 else "legitimate"
@@ -161,99 +126,51 @@ class FraudPredictor:
                     "abs_value": abs(float(shap_val))
                 })
             
-            # Sort by absolute importance
             feature_importance.sort(key=lambda x: x["abs_value"], reverse=True)
-            
-            print(f"✓ SHAP values calculated: {[f'{f['feature']}: {f['shap_value']:.4f}' for f in feature_importance[:3]]}")
-            
             return feature_importance
             
-        except ImportError:
-            print("⚠️  SHAP not available, using mock importance values")
-            return self._get_mock_importance(scaled_features)
         except Exception as e:
             print(f"⚠️  SHAP calculation failed: {e}, using mock values")
-            return self._get_mock_importance(scaled_features)
+            return self._get_mock_importance(df)
     
-    def _get_mock_importance(self, features: np.ndarray) -> List[Dict[str, Any]]:
-        """
-        Generate mock feature importance values when SHAP is not available.
-        
-        Args:
-            features: Input features (scaled or unscaled)
-            
-        Returns:
-            List of mock feature importance dictionaries
-        """
-        feature_names = self.feature_names or [
-            "transaction_amount", "merchant_category", "time_of_day", 
-            "location_mismatch", "previous_fraud_history", "device_risk_score"
-        ]
-        
+    def _get_mock_importance(self, df: pd.DataFrame) -> List[Dict[str, Any]]:
+        """Generate mock feature importance values."""
         feature_importance = []
         
-        for i, feature_name in enumerate(feature_names):
-            if i < len(features[0]):
-                # Create realistic SHAP-like values (-2 to +2 range)
-                base_val = features[0][i] if abs(features[0][i]) < 5 else features[0][i] / 1000
-                shap_val = base_val * np.random.uniform(-0.5, 0.5)
-                
-                contribution = "fraud" if shap_val > 0 else "legitimate"
-                
-                feature_importance.append({
-                    "feature": feature_name,
-                    "shap_value": float(shap_val),
-                    "contribution": contribution,
-                    "abs_value": abs(float(shap_val))
-                })
+        for feature_name in df.columns:
+            feature_val = df[feature_name].iloc[0]
+            
+            if feature_name == 'Amount':
+                shap_val = feature_val * 0.0001
+            else:
+                shap_val = feature_val * np.random.uniform(-0.1, 0.1)
+            
+            contribution = "fraud" if shap_val > 0 else "legitimate"
+            
+            feature_importance.append({
+                "feature": feature_name,
+                "shap_value": float(shap_val),
+                "contribution": contribution,
+                "abs_value": abs(float(shap_val))
+            })
         
-        # Sort by absolute importance
         feature_importance.sort(key=lambda x: x["abs_value"], reverse=True)
-        
         return feature_importance
     
     def predict(self, transaction_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Predict fraud probability and generate feature explanations.
-        
-        Args:
-            transaction_data: Dictionary containing transaction information
-            
-        Returns:
-            Dictionary containing prediction results and explanations
         """
         print(f"Predicting for transaction: {transaction_data}")
         
-        # If no model is loaded, generate realistic demo predictions
         if self.model is None:
             print("🎭 Using demo mode - no model loaded")
             return self._generate_demo_prediction(transaction_data)
         
-        # Prepare features in correct order
-        features = self._prepare_features(transaction_data)
-        print(f"Raw features shape: {features.shape}, values: {features[0][:6]}")
-        
-        # CRITICAL: Apply scaler BEFORE prediction
-        scaled_features = features
-        if self.scaler is not None:
-            try:
-                if self.scaler.n_features_in_ == features.shape[1]:
-                    scaled_features = self.scaler.transform(features)
-                    print(f"✓ Features scaled successfully")
-                    print(f"Scaled features: {scaled_features[0][:6]}")
-                else:
-                    print(f"⚠️  Feature count mismatch: scaler expects {self.scaler.n_features_in_}, got {features.shape[1]}")
-            except Exception as e:
-                print(f"⚠️  Scaling failed: {e}")
-        else:
-            print("⚠️  No scaler available, using raw features")
-        
-        # Make prediction on SCALED features
         try:
-            fraud_probability = float(self.model.predict_proba(scaled_features)[0][1])
+            fraud_probability = predict_transaction(transaction_data, self.model, self.scaler)
             print(f"✓ Fraud probability: {fraud_probability:.4f}")
             
-            # If prediction is 0.0, something is wrong - use demo mode
             if fraud_probability == 0.0:
                 print("⚠️  Model returned 0.0% - falling back to demo mode")
                 return self._generate_demo_prediction(transaction_data)
@@ -270,8 +187,46 @@ class FraudPredictor:
         else:
             risk_level = "HIGH"
         
-        # Calculate SHAP values on SCALED features
-        feature_importance = self._get_shap_values(scaled_features)
+        # Create DataFrame for SHAP calculation
+        features = {
+            'Time': 0,
+            'V1': transaction_data.get('v1', 0),
+            'V2': transaction_data.get('v2', 0),
+            'V3': transaction_data.get('v3', 0),
+            'V4': transaction_data.get('v4', 0),
+            'V5': transaction_data.get('v5', 0),
+            'V6': transaction_data.get('v6', 0),
+            'V7': transaction_data.get('v7', 0),
+            'V8': transaction_data.get('v8', 0),
+            'V9': transaction_data.get('v9', 0),
+            'V10': transaction_data.get('v10', 0),
+            'V11': transaction_data.get('v11', 0),
+            'V12': transaction_data.get('v12', 0),
+            'V13': transaction_data.get('v13', 0),
+            'V14': transaction_data.get('v14', 0),
+            'V15': transaction_data.get('v15', 0),
+            'V16': transaction_data.get('v16', 0),
+            'V17': transaction_data.get('v17', 0),
+            'V18': transaction_data.get('v18', 0),
+            'V19': transaction_data.get('v19', 0),
+            'V20': transaction_data.get('v20', 0),
+            'V21': transaction_data.get('v21', 0),
+            'V22': transaction_data.get('v22', 0),
+            'V23': transaction_data.get('v23', 0),
+            'V24': transaction_data.get('v24', 0),
+            'V25': transaction_data.get('v25', 0),
+            'V26': transaction_data.get('v26', 0),
+            'V27': transaction_data.get('v27', 0),
+            'V28': transaction_data.get('v28', 0),
+            'Amount': transaction_data.get('amount', 0),
+        }
+        
+        df = pd.DataFrame([features])
+        if self.scaler is not None:
+            df['Amount'] = self.scaler.transform(df[['Amount']])
+        
+        # Calculate SHAP values
+        feature_importance = self._get_shap_values(df)
         
         # Get top 6 features
         top_features = feature_importance[:6]
@@ -280,52 +235,57 @@ class FraudPredictor:
             "fraud_probability": fraud_probability,
             "risk_level": risk_level,
             "top_features": top_features,
-            "raw_features": features.tolist()[0]
+            "raw_features": list(features.values())
         }
     
     def _generate_demo_prediction(self, transaction_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Generate realistic demo predictions when model is not available.
-        
-        Args:
-            transaction_data: Original transaction data
-            
-        Returns:
-            Demo prediction results
-        """
+        """Generate realistic demo predictions when model is not available."""
         print(f"🎭 Generating demo prediction for: {transaction_data}")
         
-        # Calculate fraud score based on risk indicators
+        # Calculate fraud score based on V features and amount
         risk_score = 0.1  # Base risk
         
-        # High transaction amount increases risk
-        amount = transaction_data.get("transaction_amount", 0)
-        if amount > 10000:
-            risk_score += 0.4
-        elif amount > 5000:
-            risk_score += 0.2
-        
-        # Location mismatch increases risk
-        if transaction_data.get("location_mismatch", False):
+        # Amount contribution
+        amount = transaction_data.get("amount", 0)
+        if amount > 1000:
             risk_score += 0.3
-        
-        # Previous fraud history increases risk significantly
-        if transaction_data.get("previous_fraud_history", False):
-            risk_score += 0.4
-        
-        # High device risk score increases risk
-        device_risk = transaction_data.get("device_risk_score", 0) / 100
-        risk_score += device_risk * 0.3
-        
-        # Time of day (late night/early morning is riskier)
-        time_of_day = transaction_data.get("time_of_day", 12)
-        if time_of_day < 6 or time_of_day > 23:
+        elif amount > 500:
             risk_score += 0.15
         
-        # High-risk merchant category
-        merchant_cat = transaction_data.get("merchant_category", 0)
-        if merchant_cat > 15:
+        # V14 (Behavioral Score A) - negative values increase fraud risk
+        v14 = transaction_data.get("v14", 0)
+        if v14 < -5:
+            risk_score += 0.4
+        elif v14 < 0:
             risk_score += 0.2
+        
+        # V10 (Behavioral Score B) - negative values increase fraud risk
+        v10 = transaction_data.get("v10", 0)
+        if v10 < -3:
+            risk_score += 0.3
+        elif v10 < 0:
+            risk_score += 0.15
+        
+        # V12 (Behavioral Score C) - negative values increase fraud risk
+        v12 = transaction_data.get("v12", 0)
+        if v12 < -3:
+            risk_score += 0.25
+        elif v12 < 0:
+            risk_score += 0.1
+        
+        # V4 (Network Pattern) - negative values increase fraud risk
+        v4 = transaction_data.get("v4", 0)
+        if v4 < -2:
+            risk_score += 0.2
+        elif v4 < 0:
+            risk_score += 0.1
+        
+        # V17 (Transaction Velocity) - negative values increase fraud risk
+        v17 = transaction_data.get("v17", 0)
+        if v17 < -3:
+            risk_score += 0.25
+        elif v17 < 0:
+            risk_score += 0.1
         
         # Clamp between 0.05 and 0.95
         fraud_probability = max(0.05, min(0.95, risk_score))
@@ -341,61 +301,14 @@ class FraudPredictor:
             risk_level = "HIGH"
         
         # Generate realistic SHAP-like values based on actual inputs
-        feature_importance = []
-        
-        # Transaction amount contribution
-        amount_contrib = 0.45 if amount > 10000 else (0.25 if amount > 5000 else 0.1)
-        feature_importance.append({
-            "feature": "transaction_amount", 
-            "shap_value": amount_contrib, 
-            "contribution": "fraud", 
-            "abs_value": amount_contrib
-        })
-        
-        # Device risk score contribution
-        device_contrib = device_risk * 0.4
-        feature_importance.append({
-            "feature": "device_risk_score", 
-            "shap_value": device_contrib, 
-            "contribution": "fraud", 
-            "abs_value": device_contrib
-        })
-        
-        # Location mismatch contribution
-        location_contrib = 0.35 if transaction_data.get("location_mismatch") else -0.15
-        feature_importance.append({
-            "feature": "location_mismatch", 
-            "shap_value": location_contrib, 
-            "contribution": "fraud" if location_contrib > 0 else "legitimate", 
-            "abs_value": abs(location_contrib)
-        })
-        
-        # Previous fraud history contribution
-        history_contrib = 0.4 if transaction_data.get("previous_fraud_history") else -0.2
-        feature_importance.append({
-            "feature": "previous_fraud_history", 
-            "shap_value": history_contrib, 
-            "contribution": "fraud" if history_contrib > 0 else "legitimate", 
-            "abs_value": abs(history_contrib)
-        })
-        
-        # Time of day contribution
-        time_contrib = 0.2 if (time_of_day < 6 or time_of_day > 23) else -0.1
-        feature_importance.append({
-            "feature": "time_of_day", 
-            "shap_value": time_contrib, 
-            "contribution": "fraud" if time_contrib > 0 else "legitimate", 
-            "abs_value": abs(time_contrib)
-        })
-        
-        # Merchant category contribution
-        merchant_contrib = 0.2 if merchant_cat > 15 else -0.12
-        feature_importance.append({
-            "feature": "merchant_category", 
-            "shap_value": merchant_contrib, 
-            "contribution": "fraud" if merchant_contrib > 0 else "legitimate", 
-            "abs_value": abs(merchant_contrib)
-        })
+        feature_importance = [
+            {"feature": "V14", "shap_value": abs(v14) * 0.05 * (-1 if v14 < 0 else 1), "contribution": "fraud" if v14 < 0 else "legitimate", "abs_value": abs(v14) * 0.05},
+            {"feature": "Amount", "shap_value": amount * 0.0001, "contribution": "fraud", "abs_value": amount * 0.0001},
+            {"feature": "V10", "shap_value": abs(v10) * 0.04 * (-1 if v10 < 0 else 1), "contribution": "fraud" if v10 < 0 else "legitimate", "abs_value": abs(v10) * 0.04},
+            {"feature": "V12", "shap_value": abs(v12) * 0.03 * (-1 if v12 < 0 else 1), "contribution": "fraud" if v12 < 0 else "legitimate", "abs_value": abs(v12) * 0.03},
+            {"feature": "V4", "shap_value": abs(v4) * 0.025 * (-1 if v4 < 0 else 1), "contribution": "fraud" if v4 < 0 else "legitimate", "abs_value": abs(v4) * 0.025},
+            {"feature": "V17", "shap_value": abs(v17) * 0.02 * (-1 if v17 < 0 else 1), "contribution": "fraud" if v17 < 0 else "legitimate", "abs_value": abs(v17) * 0.02}
+        ]
         
         # Sort by absolute value
         feature_importance.sort(key=lambda x: x["abs_value"], reverse=True)
@@ -404,7 +317,7 @@ class FraudPredictor:
             "fraud_probability": fraud_probability,
             "risk_level": risk_level,
             "top_features": feature_importance,
-            "raw_features": [amount, merchant_cat, time_of_day, float(transaction_data.get("location_mismatch", False)), float(transaction_data.get("previous_fraud_history", False)), device_risk * 100]
+            "raw_features": [0, v14, v10, v12, v4, v17, amount]
         }
 
 # Global predictor instance

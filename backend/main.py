@@ -36,13 +36,36 @@ app.add_middleware(
 
 # Pydantic models for request/response validation
 class TransactionInput(BaseModel):
-    """Transaction input data model."""
-    transaction_amount: float = Field(..., ge=0, description="Transaction amount in USD")
-    merchant_category: int = Field(..., ge=0, le=20, description="Merchant category code (0-20)")
-    time_of_day: float = Field(..., ge=0, le=23.99, description="Time of day in 24-hour format")
-    location_mismatch: bool = Field(..., description="Whether transaction location differs from usual")
-    previous_fraud_history: bool = Field(..., description="Whether customer has previous fraud history")
-    device_risk_score: float = Field(..., ge=0, le=100, description="Device risk score (0-100)")
+    """Transaction input data model for Kaggle credit card fraud dataset."""
+    amount: float = Field(..., ge=0, description="Transaction amount in USD")
+    v1: float = Field(default=0.0, description="PCA component V1")
+    v2: float = Field(default=0.0, description="PCA component V2")
+    v3: float = Field(default=0.0, description="PCA component V3")
+    v4: float = Field(default=0.0, description="PCA component V4")
+    v5: float = Field(default=0.0, description="PCA component V5")
+    v6: float = Field(default=0.0, description="PCA component V6")
+    v7: float = Field(default=0.0, description="PCA component V7")
+    v8: float = Field(default=0.0, description="PCA component V8")
+    v9: float = Field(default=0.0, description="PCA component V9")
+    v10: float = Field(default=0.0, description="PCA component V10")
+    v11: float = Field(default=0.0, description="PCA component V11")
+    v12: float = Field(default=0.0, description="PCA component V12")
+    v13: float = Field(default=0.0, description="PCA component V13")
+    v14: float = Field(default=0.0, description="PCA component V14")
+    v15: float = Field(default=0.0, description="PCA component V15")
+    v16: float = Field(default=0.0, description="PCA component V16")
+    v17: float = Field(default=0.0, description="PCA component V17")
+    v18: float = Field(default=0.0, description="PCA component V18")
+    v19: float = Field(default=0.0, description="PCA component V19")
+    v20: float = Field(default=0.0, description="PCA component V20")
+    v21: float = Field(default=0.0, description="PCA component V21")
+    v22: float = Field(default=0.0, description="PCA component V22")
+    v23: float = Field(default=0.0, description="PCA component V23")
+    v24: float = Field(default=0.0, description="PCA component V24")
+    v25: float = Field(default=0.0, description="PCA component V25")
+    v26: float = Field(default=0.0, description="PCA component V26")
+    v27: float = Field(default=0.0, description="PCA component V27")
+    v28: float = Field(default=0.0, description="PCA component V28")
 
 class FeatureContribution(BaseModel):
     """SHAP feature contribution model."""
@@ -178,12 +201,35 @@ async def get_demo_data():
         Sample transaction data that will trigger HIGH risk
     """
     return {
-        "transaction_amount": 15000.0,
-        "merchant_category": 15,
-        "time_of_day": 3.5,
-        "location_mismatch": True,
-        "previous_fraud_history": True,
-        "device_risk_score": 85.0
+        "amount": 2000.0,
+        "v14": -10.0,
+        "v10": -6.0,
+        "v12": -5.0,
+        "v4": -4.0,
+        "v17": -5.0,
+        "v1": 0.0,
+        "v2": 0.0,
+        "v3": 0.0,
+        "v5": 0.0,
+        "v6": 0.0,
+        "v7": 0.0,
+        "v8": 0.0,
+        "v9": 0.0,
+        "v11": 0.0,
+        "v13": 0.0,
+        "v15": 0.0,
+        "v16": 0.0,
+        "v18": 0.0,
+        "v19": 0.0,
+        "v20": 0.0,
+        "v21": 0.0,
+        "v22": 0.0,
+        "v23": 0.0,
+        "v24": 0.0,
+        "v25": 0.0,
+        "v26": 0.0,
+        "v27": 0.0,
+        "v28": 0.0
     }
 
 if __name__ == "__main__":

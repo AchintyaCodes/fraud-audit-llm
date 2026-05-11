@@ -36,9 +36,18 @@ const ShapChart: React.FC<ShapChartProps> = ({ features, isLoading }) => {
   }, [features, isLoading])
 
   const formatFeatureName = (name: string) => {
-    return name
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase())
+    // Map V features to human-readable names
+    const featureMap: { [key: string]: string } = {
+      'V14': 'Behavioral Score A',
+      'V10': 'Behavioral Score B', 
+      'V12': 'Behavioral Score C',
+      'V4': 'Network Pattern',
+      'V17': 'Transaction Velocity',
+      'Amount': 'Transaction Amount'
+    }
+    
+    // Return mapped name or keep original V{n} format
+    return featureMap[name] || name
   }
 
   const getBarColor = (contribution: string) => {
