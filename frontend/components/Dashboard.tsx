@@ -46,7 +46,8 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch('http://localhost:8000/health')
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const response = await fetch(`${apiUrl}/health`)
         if (!response.ok) throw new Error('Backend unavailable')
         const data = await response.json()
         setDemoMode(data.services.llm_service === 'demo_mode')
@@ -110,7 +111,8 @@ This assessment aligns with Basel III operational risk management requirements a
           }
         }, 500)
       } else {
-        const response = await fetch('http://localhost:8000/analyze', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const response = await fetch(`${apiUrl}/analyze`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -157,9 +159,10 @@ This assessment aligns with Basel III operational risk management requirements a
     try {
       setIsExporting(true)
       
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       const response = await axios({
         method: 'POST',
-        url: 'http://localhost:8000/export-pdf',
+        url: `${apiUrl}/export-pdf`,
         data: analysisResult,
         responseType: 'blob',
         headers: {
