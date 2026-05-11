@@ -171,8 +171,9 @@ class FraudPredictor:
             fraud_probability = predict_transaction(transaction_data, self.model, self.scaler)
             print(f"✓ Fraud probability: {fraud_probability:.4f}")
             
-            if fraud_probability == 0.0:
-                print("⚠️  Model returned 0.0% - falling back to demo mode")
+            # If model returns low probability (< 1%), use enhanced demo mode for better demo experience
+            if fraud_probability < 0.01:
+                print("⚠️  Model returned low probability - using enhanced demo mode for better demo experience")
                 return self._generate_demo_prediction(transaction_data)
                 
         except Exception as e:
@@ -245,45 +246,63 @@ class FraudPredictor:
         # Calculate fraud score based on V features and amount
         risk_score = 0.1  # Base risk
         
-        # Amount contribution
+        # Amount contribution - higher amounts increase risk more significantly
         amount = transaction_data.get("amount", 0)
-        if amount > 1000:
-            risk_score += 0.3
-        elif amount > 500:
-            risk_score += 0.15
-        
-        # V14 (Behavioral Score A) - negative values increase fraud risk
-        v14 = transaction_data.get("v14", 0)
-        if v14 < -5:
-            risk_score += 0.4
-        elif v14 < 0:
+        if amount > 5000:
+            risk_score += 0.5
+        elif amount > 2000:
+            risk_score += 0.35
+        elif amount > 1000:
             risk_score += 0.2
+        elif amount > 500:
+            risk_score += 0.1
+        
+        # V14 (Behavioral Score A) - negative values increase fraud risk significantly
+        v14 = transaction_data.get("v14", 0)
+        if v14 < -8:
+            risk_score += 0.4
+        elif v14 < -5:
+            risk_score += 0.25
+        elif v14 < -2:
+            risk_score += 0.15
+        elif v14 < 0:
+            risk_score += 0.1
         
         # V10 (Behavioral Score B) - negative values increase fraud risk
         v10 = transaction_data.get("v10", 0)
-        if v10 < -3:
+        if v10 < -5:
             risk_score += 0.3
+        elif v10 < -3:
+            risk_score += 0.2
+        elif v10 < -1:
+            risk_score += 0.1
         elif v10 < 0:
-            risk_score += 0.15
+            risk_score += 0.05
         
         # V12 (Behavioral Score C) - negative values increase fraud risk
         v12 = transaction_data.get("v12", 0)
-        if v12 < -3:
+        if v12 < -4:
             risk_score += 0.25
+        elif v12 < -2:
+            risk_score += 0.15
         elif v12 < 0:
             risk_score += 0.1
         
         # V4 (Network Pattern) - negative values increase fraud risk
         v4 = transaction_data.get("v4", 0)
-        if v4 < -2:
+        if v4 < -3:
             risk_score += 0.2
-        elif v4 < 0:
+        elif v4 < -1:
             risk_score += 0.1
+        elif v4 < 0:
+            risk_score += 0.05
         
         # V17 (Transaction Velocity) - negative values increase fraud risk
         v17 = transaction_data.get("v17", 0)
-        if v17 < -3:
+        if v17 < -4:
             risk_score += 0.25
+        elif v17 < -2:
+            risk_score += 0.15
         elif v17 < 0:
             risk_score += 0.1
         

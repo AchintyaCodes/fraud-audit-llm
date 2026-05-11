@@ -43,12 +43,12 @@ interface TransactionData {
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }) => {
   const [formData, setFormData] = useState<TransactionData>({
-    amount: 2000,
-    v14: -10,
-    v10: -6,
-    v12: -5,
-    v4: -4,
-    v17: -5
+    amount: 1500,
+    v14: -8,
+    v10: -4,
+    v12: -3,
+    v4: -2,
+    v17: -3
   })
 
   const handleSubmit = (e: React.FormEvent) => {
