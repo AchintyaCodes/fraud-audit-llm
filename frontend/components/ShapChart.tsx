@@ -212,11 +212,17 @@ const ShapChart: React.FC<ShapChartProps> = ({ features, isLoading }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: chartData.length * 0.1 + 0.5 }}
-              className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10"
+              className="mt-6 p-4 rounded-lg border"
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                borderColor: 'rgba(255, 255, 255, 0.1)'
+              }}
             >
-              <div className="text-sm text-gray-300">
-                <span className="font-semibold">Impact Analysis:</span> Features with positive values increase fraud likelihood, 
-                while negative values suggest legitimate transaction patterns. The magnitude indicates the strength of influence.
+              <div className="text-sm">
+                <span className="font-bold text-white">Impact Analysis:</span>{' '}
+                <span className="text-slate-400" style={{ color: '#94a3b8' }}>
+                  Features with positive values increase fraud likelihood, while negative values suggest legitimate transaction patterns. The magnitude indicates the strength of influence.
+                </span>
               </div>
             </motion.div>
           </motion.div>

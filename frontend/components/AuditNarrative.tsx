@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 
 interface AuditNarrativeProps {
   narrative: string
@@ -81,57 +82,6 @@ const AuditNarrative: React.FC<AuditNarrativeProps> = ({
     return new Date(timestamp).toLocaleString()
   }
 
-  const formatNarrative = (text: string) => {
-    if (!text) return null;
-    
-    const lines = text.split('\n').filter(line => line.trim());
-    
-    return lines.map((line, index) => {
-      const trimmedLine = line.trim();
-      
-      // Check if it's a section header (all caps, no numbers)
-      if (trimmedLine === trimmedLine.toUpperCase() && 
-          !trimmedLine.match(/^\d+\./) && 
-          trimmedLine.length > 5 &&
-          !trimmedLine.includes(':')) {
-        return (
-          <div key={index} className="font-bold text-lg text-primary mb-3 mt-6 first:mt-0">
-            {trimmedLine}
-          </div>
-        );
-      }
-      
-      // Check if it's a numbered list item
-      if (trimmedLine.match(/^\d+\./)) {
-        return (
-          <div key={index} className="ml-4 mb-2 text-gray-300 leading-relaxed">
-            {trimmedLine}
-          </div>
-        );
-      }
-      
-      // Check if it's a recommended action line
-      if (trimmedLine.startsWith('RECOMMENDED ACTION:')) {
-        return (
-          <div key={index} className="font-semibold text-primary mb-2 mt-4">
-            {trimmedLine}
-          </div>
-        );
-      }
-      
-      // Regular paragraph text
-      if (trimmedLine.length > 0) {
-        return (
-          <div key={index} className="text-gray-300 leading-relaxed mb-2">
-            {trimmedLine}
-          </div>
-        );
-      }
-      
-      return null;
-    });
-  }
-
   return (
     <div className="space-y-6">
       {/* Header with timestamp */}
@@ -182,7 +132,37 @@ const AuditNarrative: React.FC<AuditNarrativeProps> = ({
             >
               <div className="prose prose-invert max-w-none">
                 <div className="typewriter text-gray-300 leading-relaxed">
-                  {formatNarrative(displayedText)}
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => (
+                        <p className="mb-4 leading-7" style={{ color: '#e2e8f0' }}>
+                          {children}
+                        </p>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-semibold text-white">
+                          {children}
+                        </strong>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="pl-5 mb-4 list-decimal">
+                          {children}
+                        </ol>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="pl-5 mb-4 list-disc">
+                          {children}
+                        </ul>
+                      ),
+                      li: ({ children }) => (
+                        <li className="mb-2" style={{ color: '#e2e8f0' }}>
+                          {children}
+                        </li>
+                      ),
+                    }}
+                  >
+                    {displayedText}
+                  </ReactMarkdown>
                   {isTyping && (
                     <motion.span
                       animate={{ opacity: [1, 0] }}

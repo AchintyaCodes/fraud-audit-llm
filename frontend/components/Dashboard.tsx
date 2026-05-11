@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Zap, Download, AlertTriangle, CheckCircle, Clock } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import CountUp from 'react-countup'
+import axios from 'axios'
 import TransactionForm from './TransactionForm'
 import RiskScoreRing from './RiskScoreRing'
 import ShapChart from './ShapChart'
@@ -100,6 +101,14 @@ This assessment aligns with Basel III operational risk management requirements a
         await new Promise(resolve => setTimeout(resolve, 2000))
         loadDemoData()
         toast.success('Analysis complete (Demo Mode)')
+        
+        // Scroll to results on mobile
+        setTimeout(() => {
+          const resultsSection = document.getElementById('results-section')
+          if (resultsSection && window.innerWidth < 1024) {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 500)
       } else {
         const response = await fetch('http://localhost:8000/analyze', {
           method: 'POST',
@@ -116,11 +125,27 @@ This assessment aligns with Basel III operational risk management requirements a
         const result = await response.json()
         setAnalysisResult(result)
         toast.success('Analysis complete')
+        
+        // Scroll to results on mobile
+        setTimeout(() => {
+          const resultsSection = document.getElementById('results-section')
+          if (resultsSection && window.innerWidth < 1024) {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 500)
       }
     } catch (error) {
       console.error('Analysis error:', error)
       toast.error('Analysis failed - using demo data')
       loadDemoData()
+      
+      // Scroll to results on mobile even for demo data
+      setTimeout(() => {
+        const resultsSection = document.getElementById('results-section')
+        if (resultsSection && window.innerWidth < 1024) {
+          resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 500)
     } finally {
       setIsLoading(false)
     }
@@ -132,33 +157,21 @@ This assessment aligns with Basel III operational risk management requirements a
     try {
       setIsExporting(true)
       
-      const response = await fetch('http://localhost:8000/export-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ analysis_result: analysisResult }),
-      })
+      const response = await axios.post(
+        'http://localhost:8000/export-pdf',
+        { analysis_result: analysisResult },
+        { responseType: 'blob' }
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'PDF export failed')
-      }
-
-      // Get the blob from response
-      const blob = await response.blob()
-      
       // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `FraudGuard-${analysisResult.case_id}-${new Date().toISOString().split('T')[0]}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      
-      // Cleanup
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      const url = URL.createObjectURL(
+        new Blob([response.data], { type: 'application/pdf' })
+      )
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `FraudGuard-${analysisResult.case_id}.pdf`
+      link.click()
+      URL.revokeObjectURL(url)
       
       toast.success('Report downloaded successfully')
     } catch (error) {
@@ -203,8 +216,9 @@ This assessment aligns with Basel III operational risk management requirements a
 
       {/* Navbar */}
       <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
+        initial={{ y: -60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
         className="glass border-b border-white/10 relative"
       >
         <div className="absolute bottom-0 left-0 right-0 h-0.5 gradient-border"></div>
@@ -214,7 +228,7 @@ This assessment aligns with Basel III operational risk management requirements a
             whileHover={{ scale: 1.05 }}
           >
             <Shield className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold">FraudGuard AI</h1>
+            <h1 className="text-2xl font-bold logo-shimmer">FraudGuard AI</h1>
           </motion.div>
           
           <div className="flex items-center space-x-4">
@@ -244,12 +258,14 @@ This assessment aligns with Basel III operational risk management requirements a
           
           {/* Left Panel - Transaction Form */}
           <motion.div
-            initial={{ x: -100, opacity: 0 }}
+            initial={{ x: -40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
             className="lg:col-span-2 space-y-6"
           >
-            <div className="glass rounded-2xl p-6 h-full">
+            <div className="glass rounded-2xl p-6 h-full border border-primary/15 relative overflow-hidden">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-30 blur-sm"></div>
+              <div className="relative z-10">
               <h2 className="text-xl font-semibold mb-6 flex items-center">
                 <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
                 Transaction Analysis
@@ -258,19 +274,23 @@ This assessment aligns with Basel III operational risk management requirements a
                 onSubmit={analyzeTransaction}
                 isLoading={isLoading}
               />
+              </div>
             </div>
           </motion.div>
 
           {/* Right Panel - Results */}
           <motion.div
-            initial={{ x: 100, opacity: 0 }}
+            id="results-section"
+            initial={{ x: 40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
             className="lg:col-span-3 space-y-6"
           >
             
             {/* Risk Score Ring */}
-            <div className="glass rounded-2xl p-6">
+            <div className="glass rounded-2xl p-6 border border-primary/15 relative overflow-hidden">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-30 blur-sm"></div>
+              <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Risk Assessment</h3>
                 {analysisResult && (
@@ -286,10 +306,13 @@ This assessment aligns with Basel III operational risk management requirements a
                 riskLevel={analysisResult?.risk_level || 'LOW'}
                 isLoading={isLoading}
               />
+              </div>
             </div>
 
             {/* SHAP Chart */}
-            <div className="glass rounded-2xl p-6">
+            <div className="glass rounded-2xl p-6 border border-primary/15 relative overflow-hidden">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-30 blur-sm"></div>
+              <div className="relative z-10">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <CheckCircle className="w-5 h-5 mr-2 text-primary" />
                 Feature Contributions
@@ -299,10 +322,13 @@ This assessment aligns with Basel III operational risk management requirements a
                 features={analysisResult?.top_features || []}
                 isLoading={isLoading}
               />
+              </div>
             </div>
 
             {/* Audit Narrative */}
-            <div className="glass rounded-2xl p-6">
+            <div className="glass rounded-2xl p-6 border border-primary/15 relative overflow-hidden">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 opacity-30 blur-sm"></div>
+              <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <Clock className="w-5 h-5 mr-2 text-primary" />
@@ -342,6 +368,7 @@ This assessment aligns with Basel III operational risk management requirements a
                 timestamp={analysisResult?.timestamp || ''}
                 isLoading={isLoading}
               />
+              </div>
             </div>
           </motion.div>
         </div>

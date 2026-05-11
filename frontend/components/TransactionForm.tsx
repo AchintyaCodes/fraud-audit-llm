@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, DollarSign, Clock, MapPin, Shield, History, Smartphone } from 'lucide-react'
+import { DollarSign, Shield, MapPin, History, Smartphone } from 'lucide-react'
 
 interface TransactionData {
   transaction_amount: number
@@ -63,22 +63,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const inputVariants = {
-    focused: { scale: 1.02, boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' },
-    unfocused: { scale: 1, boxShadow: '0 0 0px rgba(59, 130, 246, 0)' }
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       
       {/* Transaction Amount */}
-      <motion.div 
-        className="floating-label"
-        variants={inputVariants}
-        animate={focusedField === 'amount' ? 'focused' : 'unfocused'}
-      >
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-300">
+          Transaction Amount ($)
+        </label>
         <div className="relative">
-          <DollarSign className="absolute left-3 top-3 w-5 h-5 text-gray-400 z-10" />
+          <DollarSign className="absolute left-3 top-4 w-5 h-5 text-gray-400 z-10" />
           <input
             type="number"
             step="0.01"
@@ -87,30 +81,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
             onFocus={() => setFocusedField('amount')}
             onBlur={() => setFocusedField(null)}
             disabled={isLoading}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white placeholder-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="Transaction Amount"
+            className="w-full h-14 pl-12 pr-4 pt-5 pb-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          <label className="absolute left-12 top-3 text-gray-400 transition-all duration-200 pointer-events-none">
-            Transaction Amount ($)
-          </label>
         </div>
-      </motion.div>
+      </div>
 
       {/* Merchant Category */}
-      <motion.div 
-        className="floating-label"
-        variants={inputVariants}
-        animate={focusedField === 'merchant' ? 'focused' : 'unfocused'}
-      >
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-300">
+          Merchant Category
+        </label>
         <div className="relative">
-          <Shield className="absolute left-3 top-3 w-5 h-5 text-gray-400 z-10" />
+          <Shield className="absolute left-3 top-4 w-5 h-5 text-gray-400 z-10" />
           <select
             value={formData.merchant_category}
             onChange={(e) => handleInputChange('merchant_category', parseInt(e.target.value))}
             onFocus={() => setFocusedField('merchant')}
             onBlur={() => setFocusedField(null)}
             disabled={isLoading}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-14 pl-12 pr-4 pt-5 pb-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {merchantCategories.map(category => (
               <option key={category.value} value={category.value} className="bg-card text-white">
@@ -118,51 +107,37 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
               </option>
             ))}
           </select>
-          <label className="absolute left-12 -top-2 text-xs text-primary bg-background px-2">
-            Merchant Category
-          </label>
         </div>
-      </motion.div>
+      </div>
 
       {/* Time of Day */}
-      <motion.div 
-        className="floating-label"
-        variants={inputVariants}
-        animate={focusedField === 'time' ? 'focused' : 'unfocused'}
-      >
-        <div className="relative">
-          <Clock className="absolute left-3 top-3 w-5 h-5 text-gray-400 z-10" />
-          <input
-            type="number"
-            step="0.1"
-            min="0"
-            max="23.9"
-            value={formData.time_of_day}
-            onChange={(e) => handleInputChange('time_of_day', parseFloat(e.target.value) || 0)}
-            onFocus={() => setFocusedField('time')}
-            onBlur={() => setFocusedField(null)}
-            disabled={isLoading}
-            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white placeholder-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="Time of Day"
-          />
-          <label className="absolute left-12 top-3 text-gray-400 transition-all duration-200 pointer-events-none">
-            Time of Day (24hr format)
-          </label>
-        </div>
-        <div className="mt-1 text-xs text-gray-400">
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-300">
+          Time of Day (24hr format)
+        </label>
+        <input
+          type="number"
+          step="0.1"
+          min="0"
+          max="23.9"
+          value={formData.time_of_day}
+          onChange={(e) => handleInputChange('time_of_day', parseFloat(e.target.value) || 0)}
+          onFocus={() => setFocusedField('time')}
+          onBlur={() => setFocusedField(null)}
+          disabled={isLoading}
+          className="w-full h-14 px-4 pt-5 pb-3 bg-white/5 border border-white/10 rounded-lg focus:border-primary focus:outline-none transition-all duration-200 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+        <div className="text-xs text-gray-400">
           Current: {Math.floor(formData.time_of_day)}:{String(Math.round((formData.time_of_day % 1) * 60)).padStart(2, '0')}
         </div>
-      </motion.div>
+      </div>
 
       {/* Location Mismatch Toggle */}
-      <motion.div 
-        className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg"
-        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-      >
+      <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg min-h-14">
         <div className="flex items-center space-x-3">
           <MapPin className="w-5 h-5 text-gray-400" />
           <div>
-            <div className="font-medium">Location Mismatch</div>
+            <div className="font-medium text-white">Location Mismatch</div>
             <div className="text-sm text-gray-400">Transaction from unusual location</div>
           </div>
         </div>
@@ -181,17 +156,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           />
         </motion.button>
-      </motion.div>
+      </div>
 
       {/* Previous Fraud History Toggle */}
-      <motion.div 
-        className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg"
-        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-      >
+      <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg min-h-14">
         <div className="flex items-center space-x-3">
           <History className="w-5 h-5 text-gray-400" />
           <div>
-            <div className="font-medium">Previous Fraud History</div>
+            <div className="font-medium text-white">Previous Fraud History</div>
             <div className="text-sm text-gray-400">Customer has fraud history</div>
           </div>
         </div>
@@ -210,24 +182,18 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           />
         </motion.button>
-      </motion.div>
+      </div>
 
       {/* Device Risk Score Slider */}
-      <motion.div 
-        className="space-y-3"
-        variants={inputVariants}
-        animate={focusedField === 'device' ? 'focused' : 'unfocused'}
-      >
-        <div className="flex items-center space-x-3">
-          <Smartphone className="w-5 h-5 text-gray-400" />
-          <div className="flex-1">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Device Risk Score</span>
-              <span className="text-primary font-bold">{formData.device_risk_score}</span>
-            </div>
-            <div className="text-sm text-gray-400">Risk level of the device used</div>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Smartphone className="w-5 h-5 text-gray-400" />
+            <span className="font-medium text-white">Device Risk Score</span>
           </div>
+          <span className="text-primary font-bold text-lg">{formData.device_risk_score}</span>
         </div>
+        <div className="text-sm text-gray-400 mb-2">Risk level of the device used</div>
         <div className="relative">
           <input
             type="range"
@@ -248,25 +214,28 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, isLoading }
             style={{ width: `${formData.device_risk_score}%` }}
           />
         </div>
-      </motion.div>
+      </div>
 
       {/* Submit Button */}
-      <motion.button
-        type="submit"
-        disabled={isLoading}
-        className="w-full py-4 bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary text-white font-semibold rounded-lg transition-all duration-300 ripple disabled:opacity-50 disabled:cursor-not-allowed"
-        whileHover={{ scale: isLoading ? 1 : 1.02 }}
-        whileTap={{ scale: isLoading ? 1 : 0.98 }}
-      >
-        {isLoading ? (
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span>Analyzing...</span>
-          </div>
-        ) : (
-          'Analyze Transaction'
-        )}
-      </motion.button>
+      <div className="pt-6">
+        <motion.button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-13 bg-gradient-to-r from-[#3b82f6] to-[#2563eb] hover:from-[#2563eb] hover:to-[#3b82f6] text-white font-semibold rounded-xl transition-all duration-300 ripple disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ height: '52px' }}
+          whileHover={{ scale: isLoading ? 1 : 1.02 }}
+          whileTap={{ scale: isLoading ? 1 : 0.98 }}
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Analyzing...</span>
+            </div>
+          ) : (
+            'Analyze Transaction'
+          )}
+        </motion.button>
+      </div>
     </form>
   )
 }
