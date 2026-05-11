@@ -82,38 +82,54 @@ const AuditNarrative: React.FC<AuditNarrativeProps> = ({
   }
 
   const formatNarrative = (text: string) => {
-    // Convert markdown-style formatting to HTML-like structure for display
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .split('\n\n')
-      .map((paragraph, index) => (
-        <div key={index} className="mb-4 last:mb-0">
-          {paragraph.split('\n').map((line, lineIndex) => {
-            if (line.startsWith('**') && line.endsWith('**')) {
-              // Header line
-              return (
-                <div key={lineIndex} className="font-semibold text-primary mb-2">
-                  {line.replace(/\*\*/g, '')}
-                </div>
-              )
-            } else if (line.match(/^\d+\./)) {
-              // Numbered list item
-              return (
-                <div key={lineIndex} className="ml-4 mb-1 text-gray-300">
-                  {line}
-                </div>
-              )
-            } else {
-              // Regular paragraph
-              return (
-                <div key={lineIndex} className="text-gray-300 leading-relaxed">
-                  {line}
-                </div>
-              )
-            }
-          })}
-        </div>
-      ))
+    if (!text) return null;
+    
+    const lines = text.split('\n').filter(line => line.trim());
+    
+    return lines.map((line, index) => {
+      const trimmedLine = line.trim();
+      
+      // Check if it's a section header (all caps, no numbers)
+      if (trimmedLine === trimmedLine.toUpperCase() && 
+          !trimmedLine.match(/^\d+\./) && 
+          trimmedLine.length > 5 &&
+          !trimmedLine.includes(':')) {
+        return (
+          <div key={index} className="font-bold text-lg text-primary mb-3 mt-6 first:mt-0">
+            {trimmedLine}
+          </div>
+        );
+      }
+      
+      // Check if it's a numbered list item
+      if (trimmedLine.match(/^\d+\./)) {
+        return (
+          <div key={index} className="ml-4 mb-2 text-gray-300 leading-relaxed">
+            {trimmedLine}
+          </div>
+        );
+      }
+      
+      // Check if it's a recommended action line
+      if (trimmedLine.startsWith('RECOMMENDED ACTION:')) {
+        return (
+          <div key={index} className="font-semibold text-primary mb-2 mt-4">
+            {trimmedLine}
+          </div>
+        );
+      }
+      
+      // Regular paragraph text
+      if (trimmedLine.length > 0) {
+        return (
+          <div key={index} className="text-gray-300 leading-relaxed mb-2">
+            {trimmedLine}
+          </div>
+        );
+      }
+      
+      return null;
+    });
   }
 
   return (
@@ -165,7 +181,7 @@ const AuditNarrative: React.FC<AuditNarrativeProps> = ({
               className="space-y-4"
             >
               <div className="prose prose-invert max-w-none">
-                <div className="typewriter text-gray-300 leading-relaxed whitespace-pre-wrap">
+                <div className="typewriter text-gray-300 leading-relaxed">
                   {formatNarrative(displayedText)}
                   {isTyping && (
                     <motion.span
