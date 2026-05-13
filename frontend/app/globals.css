@@ -152,3 +152,18 @@ html {
   background: var(--bg-tertiary);
   border-radius: 4px;
 }
+
+/* Footer link styles */
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #555555;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: var(--accent-blue);
+}
