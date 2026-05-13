@@ -277,8 +277,7 @@ This assessment aligns with Basel III operational risk management requirements a
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100vh-120px)]">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Left Panel - Transaction Form */}
           <motion.div
             initial={{ x: -40, opacity: 0 }}
