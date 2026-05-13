@@ -384,31 +384,6 @@ This assessment aligns with Basel III operational risk management requirements a
           </motion.div>
         </div>
       </div>
-
-      {/* Simple Bottom Footer */}
-      <div className="border-t border-border bg-bg-secondary">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-center space-x-6">
-            <span className="text-sm text-text-secondary">Built by Achintya Gupta</span>
-            <a
-              href="https://github.com/AchintyaCodes"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-text-secondary hover:text-accent-blue transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://linkedin.com/in/achintya-gupta-bb0091311"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-text-secondary hover:text-accent-blue transition-colors"
-            >
-              LinkedIn
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
